@@ -19,34 +19,35 @@ import {
   ArrowRight
 } from "lucide-react";
 import heroImage from "@/assets/hero-books.jpg";
+import { ROUTES } from "@/lib/constants";
 
 const mainActions = [
   {
     icon: GraduationCap,
     title: "Buy Full School Course",
     description: "Complete book sets for any class from Nursery to 10th",
-    href: "/buy-course",
+    href: ROUTES.BUY_COURSE,
     color: "bg-primary",
   },
   {
     icon: BookOpen,
     title: "Buy Single Book",
     description: "Find and order individual books or items",
-    href: "/buy-book",
+    href: ROUTES.BUY_BOOK,
     color: "bg-accent",
   },
   {
     icon: ShoppingBag,
     title: "Browse Stationery",
     description: "Explore notebooks, art supplies, and more",
-    href: "/stationery",
+    href: ROUTES.STATIONERY,
     color: "bg-primary",
   },
   {
     icon: FileText,
     title: "Read Our Blog",
     description: "Tips, guides, and educational content",
-    href: "/blog",
+    href: ROUTES.BLOG,
     color: "bg-accent",
   },
 ];
@@ -90,7 +91,7 @@ const blogPosts = [
   },
 ];
 
-const Index = () => {
+const HomePage = () => {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -128,10 +129,10 @@ const Index = () => {
 
             <div className="flex flex-wrap gap-4 pt-4">
               <Button asChild size="xl" variant="hero-outline">
-                <Link to="/buy-course">Shop Now</Link>
+                <Link to={ROUTES.BUY_COURSE}>Shop Now</Link>
               </Button>
               <Button asChild size="lg" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10">
-                <Link to="/blog">Learn More</Link>
+                <Link to={ROUTES.BLOG}>Learn More</Link>
               </Button>
             </div>
           </div>
@@ -256,7 +257,7 @@ const Index = () => {
               <p className="text-muted-foreground">Tips, guides, and educational insights</p>
             </div>
             <Button asChild variant="outline" className="hidden md:flex">
-              <Link to="/blog">View All Posts</Link>
+              <Link to={ROUTES.BLOG}>View All Posts</Link>
             </Button>
           </div>
 
@@ -288,7 +289,7 @@ const Index = () => {
 
           <div className="mt-8 text-center md:hidden">
             <Button asChild variant="outline">
-              <Link to="/blog">View All Posts</Link>
+              <Link to={ROUTES.BLOG}>View All Posts</Link>
             </Button>
           </div>
         </div>
@@ -297,4 +298,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default HomePage;

@@ -35,3 +35,20 @@ export const ROUTES = {
   BLOG: "/blog",
   CHECKOUT: "/checkout",
 } as const;
+
+// Course Types
+export const COURSE_TYPES = {
+  NEW: "new",
+  OLD: "old",
+} as const;
+
+export type CourseType = typeof COURSE_TYPES.NEW | typeof COURSE_TYPES.OLD;
+
+// Steps for course selection
+export const COURSE_STEPS = {
+  SCHOOL: "school",
+  CLASS: "class",
+  COURSE: "course",
+} as const;
+
+export type CourseStep = typeof COURSE_STEPS.SCHOOL | typeof COURSE_STEPS.CLASS | typeof COURSE_STEPS.COURSE;

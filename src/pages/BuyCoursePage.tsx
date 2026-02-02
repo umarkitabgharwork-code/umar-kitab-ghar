@@ -5,26 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Search, GraduationCap, Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-
-const schools = [
-  "Ali Fondation School",
-  "The City School",
-  "Lahore Grammar School",
-  "Roots School System",
-  "Allied Schools",
-  "The Educators",
-  "Dar-e-Arqam Schools",
-  "Punjab Group of Colleges",
-  "Foundation Public School",
-  "Karachi Grammar School",
-];
-
-const classes = [
-  "Nursery", "Prep", "KG", "Class 1", "Class 2", "Class 3",
-  "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
-];
-
-type Step = "school" | "class" | "course";
+import { SCHOOLS, CLASSES, COURSE_TYPES, COURSE_STEPS, type CourseType, type CourseStep } from "@/lib/constants";
 
 interface Book {
   id: string;
@@ -45,17 +26,17 @@ const sampleBooks: Book[] = [
 ];
 
 const BuyCoursePage = () => {
-  const [step, setStep] = useState<Step>("school");
+  const [step, setStep] = useState<CourseStep>(COURSE_STEPS.SCHOOL);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
-  const [courseType, setCourseType] = useState<"new" | "old">("new");
+  const [courseType, setCourseType] = useState<CourseType>(COURSE_TYPES.NEW);
   const [books, setBooks] = useState<Book[]>(sampleBooks);
   const [searchTerm, setSearchTerm] = useState("");
   const [otherSchool, setOtherSchool] = useState("");
   const { addItem } = useCart();
   const navigate = useNavigate();
 
-  const filteredSchools = schools.filter(school =>
+  const filteredSchools = SCHOOLS.filter(school =>
     school.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -67,11 +48,11 @@ const BuyCoursePage = () => {
 
   const subtotal = books
     .filter(b => b.selected)
-    .reduce((sum, b) => sum + (courseType === "new" ? b.newPrice : b.oldPrice), 0);
+    .reduce((sum, b) => sum + (courseType === COURSE_TYPES.NEW ? b.newPrice : b.oldPrice), 0);
 
   const renderStep = () => {
     switch (step) {
-      case "school":
+      case COURSE_STEPS.SCHOOL:
         return (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-8">
@@ -97,7 +78,7 @@ const BuyCoursePage = () => {
                   className="justify-start h-auto py-4 px-5"
                   onClick={() => {
                     setSelectedSchool(school);
-                    setStep("class");
+                    setStep(COURSE_STEPS.CLASS);
                   }}
                 >
                   <GraduationCap className="h-5 w-5 mr-3 flex-shrink-0" />
@@ -120,7 +101,7 @@ const BuyCoursePage = () => {
                   disabled={!otherSchool}
                   onClick={() => {
                     setSelectedSchool(otherSchool);
-                    setStep("class");
+                    setStep(COURSE_STEPS.CLASS);
                   }}
                 >
                   Continue with "{otherSchool || "Other School"}"
@@ -130,11 +111,11 @@ const BuyCoursePage = () => {
           </div>
         );
 
-      case "class":
+      case COURSE_STEPS.CLASS:
         return (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-8">
-              <Button variant="ghost" onClick={() => setStep("school")} className="mb-4">
+              <Button variant="ghost" onClick={() => setStep(COURSE_STEPS.SCHOOL)} className="mb-4">
                 ← Back to School Selection
               </Button>
               <h2 className="text-2xl md:text-3xl font-bold mb-2">Select Class</h2>
@@ -144,14 +125,14 @@ const BuyCoursePage = () => {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-3xl mx-auto">
-              {classes.map((cls) => (
+              {CLASSES.map((cls) => (
                 <Button
                   key={cls}
                   variant={selectedClass === cls ? "default" : "outline"}
                   className="h-16"
                   onClick={() => {
                     setSelectedClass(cls);
-                    setStep("course");
+                    setStep(COURSE_STEPS.COURSE);
                   }}
                 >
                   {cls}
@@ -161,11 +142,11 @@ const BuyCoursePage = () => {
           </div>
         );
 
-      case "course":
+      case COURSE_STEPS.COURSE:
         return (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center mb-8">
-              <Button variant="ghost" onClick={() => setStep("class")} className="mb-4">
+              <Button variant="ghost" onClick={() => setStep(COURSE_STEPS.CLASS)} className="mb-4">
                 ← Back to Class Selection
               </Button>
               <h2 className="text-2xl md:text-3xl font-bold mb-2">Select Books</h2>
@@ -177,15 +158,15 @@ const BuyCoursePage = () => {
             {/* Course Type Tabs */}
             <div className="flex justify-center gap-2 mb-6">
               <Button
-                variant={courseType === "new" ? "default" : "outline"}
-                onClick={() => setCourseType("new")}
+                variant={courseType === COURSE_TYPES.NEW ? "default" : "outline"}
+                onClick={() => setCourseType(COURSE_TYPES.NEW)}
                 className="min-w-32"
               >
                 New Course
               </Button>
               <Button
-                variant={courseType === "old" ? "default" : "outline"}
-                onClick={() => setCourseType("old")}
+                variant={courseType === COURSE_TYPES.OLD ? "default" : "outline"}
+                onClick={() => setCourseType(COURSE_TYPES.OLD)}
                 className="min-w-32"
               >
                 Old Course
@@ -215,9 +196,9 @@ const BuyCoursePage = () => {
                       </div>
                       <div className="text-right">
                         <span className="font-semibold">
-                          Rs. {courseType === "new" ? book.newPrice : book.oldPrice}
+                          Rs. {courseType === COURSE_TYPES.NEW ? book.newPrice : book.oldPrice}
                         </span>
-                        {courseType === "old" && (
+                        {courseType === COURSE_TYPES.OLD && (
                           <span className="text-xs text-muted-foreground line-through ml-2">
                             Rs. {book.newPrice}
                           </span>
@@ -262,8 +243,8 @@ const BuyCoursePage = () => {
                           .forEach(book => {
                             addItem({
                               id: `course-${book.id}-${courseType}`,
-                              name: `${book.name} (${courseType === "new" ? "New" : "Old"} Course)`,
-                              price: courseType === "new" ? book.newPrice : book.oldPrice,
+                              name: `${book.name} (${courseType === COURSE_TYPES.NEW ? "New" : "Old"} Course)`,
+                              price: courseType === COURSE_TYPES.NEW ? book.newPrice : book.oldPrice,
                               category: `${selectedSchool} - ${selectedClass}`,
                             });
                           });
@@ -286,26 +267,29 @@ const BuyCoursePage = () => {
       <div className="container">
         {/* Progress Steps */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {["school", "class", "course"].map((s, index) => (
-            <div key={s} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === s 
-                  ? "bg-primary text-primary-foreground" 
-                  : index < ["school", "class", "course"].indexOf(step)
-                    ? "bg-primary/20 text-primary"
-                    : "bg-secondary text-muted-foreground"
-              }`}>
-                {index + 1}
+          {[COURSE_STEPS.SCHOOL, COURSE_STEPS.CLASS, COURSE_STEPS.COURSE].map((s, index) => {
+            const stepIndex = [COURSE_STEPS.SCHOOL, COURSE_STEPS.CLASS, COURSE_STEPS.COURSE].indexOf(step);
+            return (
+              <div key={s} className="flex items-center">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  step === s 
+                    ? "bg-primary text-primary-foreground" 
+                    : index < stepIndex
+                      ? "bg-primary/20 text-primary"
+                      : "bg-secondary text-muted-foreground"
+                }`}>
+                  {index + 1}
+                </div>
+                {index < 2 && (
+                  <div className={`w-12 h-0.5 mx-2 ${
+                    index < stepIndex
+                      ? "bg-primary"
+                      : "bg-secondary"
+                  }`} />
+                )}
               </div>
-              {index < 2 && (
-                <div className={`w-12 h-0.5 mx-2 ${
-                  index < ["school", "class", "course"].indexOf(step)
-                    ? "bg-primary"
-                    : "bg-secondary"
-                }`} />
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {renderStep()}

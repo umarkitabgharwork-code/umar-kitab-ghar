@@ -130,16 +130,18 @@ const BuyBookPage = () => {
             </div>
 
             {filteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium mb-2">No items found</h3>
-                <p className="text-muted-foreground mb-4">
-                  We couldn't find what you're looking for. Try a different search or contact us.
-                </p>
-                <Button variant="outline" asChild>
-                  <Link to="/request-book">Request This Item</Link>
-                </Button>
-              </div>
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No items found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    We couldn't find what you're looking for. Try a different search or contact us.
+                  </p>
+                  <Button variant="outline" onClick={() => setSearchTerm("")}>
+                    Clear Search
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </div>
 

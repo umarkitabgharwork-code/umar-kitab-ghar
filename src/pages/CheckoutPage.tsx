@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { ROUTES } from "@/lib/constants";
 
 const CheckoutPage = () => {
   const { items, getTotal, clearCart } = useCart();
@@ -40,7 +41,7 @@ const CheckoutPage = () => {
 
     // In a real app, you would redirect to a success page
     // For now, just navigate back to home
-    navigate("/");
+    navigate(ROUTES.HOME);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
