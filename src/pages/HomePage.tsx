@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   BookOpen, 
   GraduationCap, 
@@ -20,6 +22,7 @@ import {
 } from "lucide-react";
 import heroImage from "@/assets/hero-books.jpg";
 import { ROUTES } from "@/lib/constants";
+import { getBlogPosts } from "@/services/api";
 
 const mainActions = [
   {
@@ -67,31 +70,21 @@ const features = [
   { icon: Truck, title: "Easy Delivery", description: "Pickup or home delivery options" },
 ];
 
-const blogPosts = [
-  {
-    title: "How to Choose the Right Stationery for Your Child",
-    excerpt: "Discover the best stationery items that help improve your child's learning experience and creativity.",
-    category: "Tips & Guides",
-    date: "Dec 5, 2025",
-    href: "/blog/choose-stationery",
-  },
-  {
-    title: "The Importance of Quality School Books",
-    excerpt: "Learn why investing in quality textbooks can make a significant difference in your child's education.",
-    category: "Education",
-    date: "Dec 3, 2025",
-    href: "/blog/quality-books",
-  },
-  {
-    title: "Top 10 Art Supplies for Beginners",
-    excerpt: "A comprehensive guide to essential art supplies every beginner student should have.",
-    category: "Art Supplies",
-    date: "Dec 1, 2025",
-    href: "/blog/art-supplies-beginners",
-  },
-];
-
 const HomePage = () => {
+  // Fetch blog posts using React Query (only latest 3 for homepage)
+  const { data: blogPostsResponse, isLoading: isLoadingBlog } = useQuery({
+    queryKey: ["blogPosts"],
+    queryFn: async () => {
+      const response = await getBlogPosts();
+      if (!response.success) {
+        return [];
+      }
+      return response.data.slice(0, 3); // Only show latest 3 on homepage
+    },
+  });
+
+  const blogPosts = blogPostsResponse || [];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -261,31 +254,50 @@ const HomePage = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {blogPosts.map((post, index) => (
-              <Link key={post.href} to={post.href}>
-                <Card 
-                  variant="interactive" 
-                  className="h-full"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
+          {/* Loading State */}
+          {isLoadingBlog && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} variant="interactive" className="h-full">
                   <CardContent className="p-6 space-y-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        {post.category}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{post.date}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold line-clamp-2">{post.title}</h3>
-                    <p className="text-muted-foreground text-sm line-clamp-3">{post.excerpt}</p>
-                    <div className="flex items-center text-primary text-sm font-medium">
-                      Read More <ArrowRight className="h-4 w-4 ml-1" />
-                    </div>
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
                   </CardContent>
                 </Card>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Blog Posts List */}
+          {!isLoadingBlog && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {blogPosts.map((post, index) => (
+                <Link key={post.id} to={`/blog/${post.slug}`}>
+                  <Card 
+                    variant="interactive" 
+                    className="h-full"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <CardContent className="p-6 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-full">
+                          {post.category}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{post.date}</span>
+                      </div>
+                      <h3 className="text-lg font-semibold line-clamp-2">{post.title}</h3>
+                      <p className="text-muted-foreground text-sm line-clamp-3">{post.excerpt}</p>
+                      <div className="flex items-center text-primary text-sm font-medium">
+                        Read More <ArrowRight className="h-4 w-4 ml-1" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 text-center md:hidden">
             <Button asChild variant="outline">

@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   BookMarked, 
   BookOpen, 
@@ -8,69 +11,39 @@ import {
   Pencil, 
   Notebook,
   FileText,
-  Boxes
+  Boxes,
+  AlertCircle
 } from "lucide-react";
+import { getCategories } from "@/services/api";
+import { Category } from "@/types";
 
-const categories = [
-  { 
-    icon: BookMarked, 
-    name: "Islamic Books / Holy Quran", 
-    description: "Quran, Islamic literature, and religious texts",
-    href: "/stationery/islamic-books",
-    count: 150
-  },
-  { 
-    icon: BookOpen, 
-    name: "Novels", 
-    description: "Fiction, non-fiction, and story books",
-    href: "/stationery/novels",
-    count: 200
-  },
-  { 
-    icon: Palette, 
-    name: "Colors & Markers", 
-    description: "Crayons, markers, color pencils, and paints",
-    href: "/stationery/colors-markers",
-    count: 85
-  },
-  { 
-    icon: FolderOpen, 
-    name: "Files & Folders", 
-    description: "Document organizers, binders, and folders",
-    href: "/stationery/files-folders",
-    count: 60
-  },
-  { 
-    icon: Pencil, 
-    name: "Art Supplies", 
-    description: "Drawing materials, canvas, and craft supplies",
-    href: "/stationery/art-supplies",
-    count: 120
-  },
-  { 
-    icon: Notebook, 
-    name: "Notebooks", 
-    description: "Exercise books, registers, and journals",
-    href: "/stationery/notebooks",
-    count: 95
-  },
-  { 
-    icon: FileText, 
-    name: "Loose Sheets", 
-    description: "Graph paper, lined sheets, and blank paper",
-    href: "/stationery/loose-sheets",
-    count: 40
-  },
-  { 
-    icon: Boxes, 
-    name: "General Stationery", 
-    description: "Pens, pencils, erasers, rulers, and more",
-    href: "/stationery/general",
-    count: 180
-  },
-];
+// Icon mapping for categories
+const categoryIcons: Record<string, typeof BookMarked> = {
+  "Islamic Books / Holy Quran": BookMarked,
+  "Novels": BookOpen,
+  "Colors & Markers": Palette,
+  "Files & Folders": FolderOpen,
+  "Art Supplies": Pencil,
+  "Notebooks": Notebook,
+  "Loose Sheets": FileText,
+  "General Stationery": Boxes,
+};
 
 const StationeryPage = () => {
+  // Fetch categories using React Query
+  const { data: categoriesResponse, isLoading, isError, error } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const response = await getCategories();
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch categories");
+      }
+      return response.data;
+    },
+  });
+
+  const categories = categoriesResponse || [];
+
   return (
     <div className="py-8 md:py-12">
       <div className="container">
@@ -83,28 +56,61 @@ const StationeryPage = () => {
         </div>
 
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {categories.map((category, index) => (
-            <Link key={category.href} to={category.href}>
-              <Card 
-                variant="interactive" 
-                className="h-full"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
+        {/* Loading State */}
+        {isLoading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <Card key={i} variant="interactive" className="h-full">
                 <CardContent className="p-6 space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <category.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg mb-1">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-2">{category.description}</p>
-                    <span className="text-xs text-primary font-medium">{category.count}+ items</span>
-                  </div>
+                  <Skeleton className="w-14 h-14 rounded-2xl" />
+                  <Skeleton className="h-6 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-20" />
                 </CardContent>
               </Card>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error State */}
+        {isError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error loading categories</AlertTitle>
+            <AlertDescription>
+              {error instanceof Error ? error.message : "Failed to load categories. Please try again later."}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Categories List */}
+        {!isLoading && !isError && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {categories.map((category, index) => {
+              const IconComponent = categoryIcons[category.name] || Boxes;
+              return (
+                <Link key={category.id} to={category.href}>
+                  <Card 
+                    variant="interactive" 
+                    className="h-full"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <CardContent className="p-6 space-y-4">
+                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                        <IconComponent className="h-7 w-7 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg mb-1">{category.name}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">{category.description}</p>
+                        <span className="text-xs text-primary font-medium">{category.count}+ items</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         {/* SEO Content */}
         <div className="mt-16 max-w-4xl mx-auto text-center">

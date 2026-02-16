@@ -1,37 +1,42 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, BookOpen, ShoppingCart, Plus, Minus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Search, BookOpen, ShoppingCart, Plus, Minus, AlertCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image?: string;
-}
-
-const sampleProducts: Product[] = [
-  { id: "1", name: "English Grammar Book", price: 350, category: "Books" },
-  { id: "2", name: "Mathematics Workbook", price: 280, category: "Books" },
-  { id: "3", name: "Science Lab Manual", price: 420, category: "Books" },
-  { id: "4", name: "Urdu Composition", price: 320, category: "Books" },
-  { id: "5", name: "Oxford Dictionary", price: 550, category: "Reference" },
-  { id: "6", name: "Atlas & Maps", price: 480, category: "Reference" },
-  { id: "7", name: "Drawing Book A4", price: 120, category: "Art" },
-  { id: "8", name: "Color Pencil Set (24)", price: 380, category: "Art" },
-];
+import { getProducts } from "@/services/api";
+import { Product } from "@/types";
 
 const BuyBookPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { items, addItem, updateQuantity, getTotal, getItemCount } = useCart();
 
-  const filteredProducts = sampleProducts.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch products using React Query
+  const { data: productsResponse, isLoading, isError, error } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await getProducts();
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch products");
+      }
+      return response.data;
+    },
+  });
+
+  const products = productsResponse || [];
+
+  // Filter products based on search term
+  const filteredProducts = useMemo(() => {
+    if (!products.length) return [];
+    return products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [products, searchTerm]);
 
   const handleAddToCart = (product: Product) => {
     addItem({
@@ -85,8 +90,37 @@ const BuyBookPage = () => {
         <div className="grid md:grid-cols-3 gap-8">
           {/* Products Grid */}
           <div className="md:col-span-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredProducts.map((product) => (
+            {/* Loading State */}
+            {isLoading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} variant="elevated">
+                    <CardContent className="p-4">
+                      <Skeleton className="aspect-square w-full mb-4" />
+                      <Skeleton className="h-4 w-20 mb-2" />
+                      <Skeleton className="h-5 w-full mb-2" />
+                      <Skeleton className="h-6 w-24" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Error State */}
+            {isError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error loading products</AlertTitle>
+                <AlertDescription>
+                  {error instanceof Error ? error.message : "Failed to load products. Please try again later."}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Products List */}
+            {!isLoading && !isError && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {filteredProducts.map((product) => (
                 <Card key={product.id} variant="elevated">
                   <CardContent className="p-4">
                     <div className="aspect-square bg-secondary/50 rounded-lg mb-4 flex items-center justify-center">
@@ -126,10 +160,12 @@ const BuyBookPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
-            {filteredProducts.length === 0 && (
+            {/* Empty State */}
+            {!isLoading && !isError && filteredProducts.length === 0 && (
               <Card>
                 <CardContent className="p-12 text-center">
                   <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />

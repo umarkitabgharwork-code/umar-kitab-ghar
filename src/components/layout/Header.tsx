@@ -1,23 +1,157 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, BookOpen, ShoppingCart, Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, X, BookOpen, ShoppingCart, Search, ChevronDown } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/buy-course", label: "Buy Course" },
-  { href: "/buy-book", label: "Buy Book" },
-  { href: "/stationery", label: "Stationery" },
-  { href: "/blog", label: "Blog" },
-];
+import { NAV_MENU_ITEMS, type NavMenuItem } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openMobileDropdowns, setOpenMobileDropdowns] = useState<Set<string>>(new Set());
   const location = useLocation();
   const navigate = useNavigate();
   const { getItemCount } = useCart();
   const cartItemCount = getItemCount();
+
+  const isActiveRoute = (item: NavMenuItem): boolean => {
+    if (item.href) {
+      return location.pathname === item.href;
+    }
+    if (item.children) {
+      return item.children.some((child) => child.href === location.pathname);
+    }
+    return false;
+  };
+
+  const toggleMobileDropdown = (label: string) => {
+    const newSet = new Set(openMobileDropdowns);
+    if (newSet.has(label)) {
+      newSet.delete(label);
+    } else {
+      newSet.add(label);
+    }
+    setOpenMobileDropdowns(newSet);
+  };
+
+  const renderDesktopNavItem = (item: NavMenuItem) => {
+    if (item.children && item.children.length > 0) {
+      const isActive = isActiveRoute(item);
+      return (
+        <DropdownMenu key={item.label}>
+          <DropdownMenuTrigger
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1",
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )}
+          >
+            {item.label}
+            <ChevronDown className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {item.children.map((child) => (
+              <DropdownMenuItem key={child.label} asChild>
+                <Link
+                  to={child.href || "#"}
+                  className={cn(
+                    location.pathname === child.href && "bg-accent"
+                  )}
+                >
+                  {child.label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <Link
+        key={item.label}
+        to={item.href || "#"}
+        className={cn(
+          "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+          location.pathname === item.href
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+        )}
+      >
+        {item.label}
+      </Link>
+    );
+  };
+
+  const renderMobileNavItem = (item: NavMenuItem) => {
+    if (item.children && item.children.length > 0) {
+      const isOpen = openMobileDropdowns.has(item.label);
+      const isActive = isActiveRoute(item);
+      return (
+        <div key={item.label} className="flex flex-col">
+          <button
+            onClick={() => toggleMobileDropdown(item.label)}
+            className={cn(
+              "px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-between w-full",
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )}
+          >
+            {item.label}
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform",
+                isOpen && "rotate-180"
+              )}
+            />
+          </button>
+          {isOpen && (
+            <div className="pl-4 mt-2 space-y-1">
+              {item.children.map((child) => (
+                <Link
+                  key={child.label}
+                  to={child.href || "#"}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors block",
+                    location.pathname === child.href
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  )}
+                >
+                  {child.label}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.label}
+        to={item.href || "#"}
+        onClick={() => setIsMenuOpen(false)}
+        className={cn(
+          "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+          location.pathname === item.href
+            ? "bg-primary/10 text-primary"
+            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+        )}
+      >
+        {item.label}
+      </Link>
+    );
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
@@ -34,19 +168,7 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                location.pathname === link.href
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_MENU_ITEMS.map((item) => renderDesktopNavItem(item))}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -82,20 +204,7 @@ export function Header() {
       {isMenuOpen && (
         <nav className="md:hidden border-t bg-card p-4 animate-fade-in">
           <div className="flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.href
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_MENU_ITEMS.map((item) => renderMobileNavItem(item))}
           </div>
         </nav>
       )}
