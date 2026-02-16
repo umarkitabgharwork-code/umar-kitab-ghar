@@ -4,7 +4,7 @@
  * Returns typed data matching the TypeScript models
  */
 
-import { Product, Category, BlogPost, ApiResponse } from "@/types";
+import { Product, ProductType, ProductCategory, Category, BlogPost, ApiResponse } from "@/types";
 
 // Simulate network delay (500-1500ms)
 const delay = (ms: number = 800): Promise<void> => {
@@ -13,18 +13,51 @@ const delay = (ms: number = 800): Promise<void> => {
 
 // Mock products data
 const mockProducts: Product[] = [
-  { id: "1", name: "English Grammar Book", price: 350, category: "Books", inStock: true },
-  { id: "2", name: "Mathematics Workbook", price: 280, category: "Books", inStock: true },
-  { id: "3", name: "Science Lab Manual", price: 420, category: "Books", inStock: true },
-  { id: "4", name: "Urdu Composition", price: 320, category: "Books", inStock: true },
-  { id: "5", name: "Oxford Dictionary", price: 550, category: "Reference", inStock: true },
-  { id: "6", name: "Atlas & Maps", price: 480, category: "Reference", inStock: true },
-  { id: "7", name: "Drawing Book A4", price: 120, category: "Art", inStock: true },
-  { id: "8", name: "Color Pencil Set (24)", price: 380, category: "Art", inStock: true },
-  { id: "9", name: "Geometry Set", price: 250, category: "Art", inStock: true },
-  { id: "10", name: "Notebook A4 (100 pages)", price: 150, category: "Notebooks", inStock: true },
-  { id: "11", name: "Islamic Studies Book", price: 300, category: "Islamic Books", inStock: true },
-  { id: "12", name: "Quran with Translation", price: 1200, category: "Islamic Books", inStock: true },
+  // Book type - Study category
+  { id: "1", name: "English Grammar Book", price: 350, type: "book", category: "study", inStock: true },
+  { id: "2", name: "Mathematics Workbook", price: 280, type: "book", category: "study", inStock: true },
+  { id: "3", name: "Science Lab Manual", price: 420, type: "book", category: "study", inStock: true },
+  { id: "4", name: "Urdu Composition", price: 320, type: "book", category: "study", inStock: true },
+  { id: "5", name: "Oxford Dictionary", price: 550, type: "book", category: "study", inStock: true },
+  { id: "6", name: "Atlas & Maps", price: 480, type: "book", category: "study", inStock: true },
+  // Book type - Islamic category
+  { id: "11", name: "Islamic Studies Book", price: 300, type: "book", category: "islamic", inStock: true },
+  { id: "12", name: "Quran with Translation", price: 1200, type: "book", category: "islamic", inStock: true },
+  { id: "13", name: "Hadith Collection", price: 450, type: "book", category: "islamic", inStock: true },
+  // Book type - Novel category
+  { id: "14", name: "Classic Novel Collection", price: 600, type: "book", category: "novel", inStock: true },
+  { id: "15", name: "Mystery Novel", price: 400, type: "book", category: "novel", inStock: true },
+  // Other type - Art & Craft category
+  { id: "7", name: "Drawing Book A4", price: 120, type: "other", category: "art-craft", inStock: true },
+  { id: "8", name: "Color Pencil Set (24)", price: 380, type: "other", category: "art-craft", inStock: true },
+  { id: "9", name: "Geometry Set", price: 250, type: "other", category: "art-craft", inStock: true },
+  // Other type - Sketching category
+  { id: "16", name: "Sketching Pencil Set", price: 320, type: "other", category: "sketching", inStock: true },
+  { id: "17", name: "Sketch Pad A4", price: 180, type: "other", category: "sketching", inStock: true },
+  // Other type - Painting category
+  { id: "18", name: "Watercolor Paint Set", price: 550, type: "other", category: "painting", inStock: true },
+  { id: "19", name: "Canvas Board Set", price: 450, type: "other", category: "painting", inStock: true },
+  // Other type - Diaries category
+  { id: "10", name: "Notebook A4 (100 pages)", price: 150, type: "other", category: "diaries", inStock: true },
+  { id: "20", name: "Personal Diary", price: 200, type: "other", category: "diaries", inStock: true },
+  // Other type - Gift category
+  { id: "21", name: "Gift Box Set", price: 500, type: "other", category: "gift", inStock: true },
+  { id: "22", name: "Premium Gift Wrapping", price: 150, type: "other", category: "gift", inStock: true },
+  // Other type - Birthday category
+  { id: "23", name: "Birthday Card Set", price: 120, type: "other", category: "birthday", inStock: true },
+  { id: "24", name: "Party Decorations", price: 300, type: "other", category: "birthday", inStock: true },
+  // Other type - Toys category
+  { id: "25", name: "Educational Toy Set", price: 800, type: "other", category: "toys", inStock: true },
+  { id: "26", name: "Building Blocks", price: 600, type: "other", category: "toys", inStock: true },
+  // Other type - Bags category
+  { id: "27", name: "School Backpack", price: 1200, type: "other", category: "bags", inStock: true },
+  { id: "28", name: "Laptop Bag", price: 1500, type: "other", category: "bags", inStock: true },
+  // Other type - Geometry Box category
+  { id: "29", name: "Professional Geometry Box", price: 350, type: "other", category: "geometry-box", inStock: true },
+  // Other type - Pencil Box category
+  { id: "30", name: "Premium Pencil Box", price: 250, type: "other", category: "pencil-box", inStock: true },
+  // Other type - Customize category
+  { id: "31", name: "Custom Printed Notebook", price: 400, type: "other", category: "customize", inStock: true },
 ];
 
 // Mock categories data
@@ -152,13 +185,31 @@ const mockBlogPosts: BlogPost[] = [
 ];
 
 /**
- * Get all products
+ * Get all products with optional filtering
  * Simulates fetching products from API
+ * @param type - Optional product type filter ("book" | "other")
+ * @param category - Optional product category filter
  */
-export async function getProducts(): Promise<ApiResponse<Product[]>> {
+export async function getProducts(
+  type?: ProductType,
+  category?: ProductCategory
+): Promise<ApiResponse<Product[]>> {
   await delay(600);
+  
+  let filteredProducts = [...mockProducts];
+  
+  // Apply type filter if provided
+  if (type) {
+    filteredProducts = filteredProducts.filter((product) => product.type === type);
+  }
+  
+  // Apply category filter if provided
+  if (category) {
+    filteredProducts = filteredProducts.filter((product) => product.category === category);
+  }
+  
   return {
-    data: mockProducts,
+    data: filteredProducts,
     success: true,
   };
 }

@@ -22,6 +22,7 @@ import {
 } from "./pages/LegalPages";
 import NotFound from "./pages/NotFound";
 import PlaceholderPage from "./pages/PlaceholderPage";
+import CategoryPage from "./pages/CategoryPage";
 
 const queryClient = new QueryClient();
 
@@ -39,20 +40,8 @@ const App = () => (
                 <Route path="/new-deal" element={<PlaceholderPage title="New Deal" description="Discover our latest deals and special offers." />} />
                 <Route path="/buy-course" element={<BuyCoursePage />} />
                 <Route path="/buy-book" element={<BuyBookPage />} />
-                <Route path="/books/islamic" element={<PlaceholderPage title="Islamic Books" description="Browse our collection of Islamic books and literature." />} />
-                <Route path="/books/study" element={<PlaceholderPage title="Study Books" description="Find the perfect study materials for your academic needs." />} />
-                <Route path="/books/novel" element={<PlaceholderPage title="Novel Books" description="Explore our wide selection of novels and fiction." />} />
-                <Route path="/other/gift" element={<PlaceholderPage title="Gift Items" description="Find the perfect gift for any occasion." />} />
-                <Route path="/other/birthday" element={<PlaceholderPage title="Birthday Items" description="Celebrate birthdays with our special collection." />} />
-                <Route path="/other/art-craft" element={<PlaceholderPage title="Art & Craft" description="Unleash your creativity with our art and craft supplies." />} />
-                <Route path="/other/sketching" element={<PlaceholderPage title="Sketching" description="Professional sketching supplies for artists." />} />
-                <Route path="/other/painting" element={<PlaceholderPage title="Painting & Canvas" description="Everything you need for painting and canvas work." />} />
-                <Route path="/other/toys" element={<PlaceholderPage title="Toy Items" description="Fun and educational toys for all ages." />} />
-                <Route path="/other/bags" element={<PlaceholderPage title="Bags" description="Stylish and functional bags for school and travel." />} />
-                <Route path="/other/geometry-box" element={<PlaceholderPage title="Geometry Box" description="Complete geometry sets for students." />} />
-                <Route path="/other/pencil-box" element={<PlaceholderPage title="Pencil Box" description="Organize your stationery with our pencil boxes." />} />
-                <Route path="/other/diaries" element={<PlaceholderPage title="Diaries" description="Beautiful diaries and journals for your thoughts." />} />
-                <Route path="/other/customize" element={<PlaceholderPage title="Customize Item" description="Create personalized items just for you." />} />
+                <Route path="/books/:category" element={<CategoryPage />} />
+                <Route path="/other/:category" element={<CategoryPage />} />
                 <Route path="/stationery" element={<StationeryPage />} />
                 <Route path="/stationery/:category" element={<StationeryPage />} />
                 <Route path="/blog" element={<BlogPage />} />
