@@ -4,19 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCart } from "@/contexts/CartContext";
-import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { useCheckout } from "@/contexts/CheckoutContext";
+import { ArrowLeft, ShoppingCart, MapPin, Loader2, AlertCircle } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 
-const CheckoutPage = () => {
-  const { items, getTotal, clearCart } = useCart();
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-  });
+// Mock reverse geocoding function
+const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+  // In a real app, you would use a service like Google Maps Geocoding API
+  // or OpenStreetMap Nominatim API
+  // For now, return a mock address
+  return `Street ${Math.floor(Math.random() * 100)}, Area near ${lat.toFixed(4)}, ${lng.toFixed(4)}, Karachi, Pakistan`;
+};
 
+const CheckoutPage = () => {
+  const { items, getTotal } = useCart();
+  const { checkoutState, updateFormData } = useCheckout();
+  const navigate = useNavigate();
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const formData = checkoutState.formData;
   const total = getTotal();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,27 +36,77 @@ const CheckoutPage = () => {
       return;
     }
 
-    const orderData = {
-      items,
-      total,
-      customer: formData,
-      timestamp: new Date().toISOString(),
-    };
+    // Validate required fields
+    if (!formData.name.trim() || !formData.primaryPhone.trim() || !formData.address.trim()) {
+      return;
+    }
 
-    // Log order data (no backend integration)
-    console.log("Order submitted:", orderData);
-
-    // Clear cart after order
-    clearCart();
-
-    // In a real app, you would redirect to a success page
-    // For now, just navigate back to home
-    navigate(ROUTES.HOME);
+    // Navigate to delivery method selection
+    navigate(ROUTES.DELIVERY_METHOD);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    updateFormData({ [name]: value });
+  };
+
+  const handleUseCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setIsLoadingLocation(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          const address = await reverseGeocode(latitude, longitude);
+          updateFormData({
+            address,
+            latitude,
+            longitude,
+          });
+        } catch (error) {
+          setLocationError("Failed to get address from location. Please enter manually.");
+        } finally {
+          setIsLoadingLocation(false);
+        }
+      },
+      (error) => {
+        setIsLoadingLocation(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError("Location permission denied. Please enable location access or enter address manually.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError("Location information unavailable. Please enter address manually.");
+            break;
+          case error.TIMEOUT:
+            setLocationError("Location request timed out. Please try again or enter address manually.");
+            break;
+          default:
+            setLocationError("An error occurred while getting your location. Please enter address manually.");
+            break;
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  // Generate map embed URL (using OpenStreetMap)
+  const getMapEmbedUrl = (): string | null => {
+    if (formData.latitude && formData.longitude) {
+      return `https://www.openstreetmap.org/export/embed.html?bbox=${formData.longitude - 0.01},${formData.latitude - 0.01},${formData.longitude + 0.01},${formData.latitude + 0.01}&layer=mapnik&marker=${formData.latitude},${formData.longitude}`;
+    }
+    return null;
   };
 
   if (items.length === 0) {
@@ -100,34 +160,102 @@ const CheckoutPage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Label htmlFor="primaryPhone">Primary Phone *</Label>
                     <Input
-                      id="phone"
-                      name="phone"
+                      id="primaryPhone"
+                      name="primaryPhone"
                       type="tel"
-                      value={formData.phone}
+                      value={formData.primaryPhone}
                       onChange={handleInputChange}
                       required
                       placeholder="03XX-XXXXXXX"
+                      pattern="[0-9]{4}-[0-9]{7}"
+                    />
+                    <p className="text-xs text-muted-foreground">Format: 03XX-XXXXXXX</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryPhone">Secondary Phone (Optional)</Label>
+                    <Input
+                      id="secondaryPhone"
+                      name="secondaryPhone"
+                      type="tel"
+                      value={formData.secondaryPhone}
+                      onChange={handleInputChange}
+                      placeholder="03XX-XXXXXXX"
+                      pattern="[0-9]{4}-[0-9]{7}"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">Delivery Address *</Label>
-                    <textarea
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="address">Delivery Address *</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleUseCurrentLocation}
+                        disabled={isLoadingLocation}
+                        className="text-xs"
+                      >
+                        {isLoadingLocation ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Getting Location...
+                          </>
+                        ) : (
+                          <>
+                            <MapPin className="h-3 w-3 mr-1" />
+                            Use Current Location
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    <Textarea
                       id="address"
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
                       required
                       rows={4}
-                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="Enter your complete delivery address"
                     />
+                    {locationError && (
+                      <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Location Error</AlertTitle>
+                        <AlertDescription>{locationError}</AlertDescription>
+                      </Alert>
+                    )}
+                    {formData.latitude && formData.longitude && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-xs text-muted-foreground">
+                          Location: {formData.latitude.toFixed(4)}, {formData.longitude.toFixed(4)}
+                        </p>
+                        <div className="w-full h-48 rounded-md overflow-hidden border">
+                          <iframe
+                            title="Location Map"
+                            width="100%"
+                            height="100%"
+                            frameBorder="0"
+                            scrolling="no"
+                            marginHeight={0}
+                            marginWidth={0}
+                            src={getMapEmbedUrl() || undefined}
+                            className="border-0"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
-                    Place Order
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    size="lg"
+                    disabled={!formData.name.trim() || !formData.primaryPhone.trim() || !formData.address.trim()}
+                  >
+                    Continue to Delivery Method
                   </Button>
                 </form>
               </CardContent>

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
+import { CheckoutProvider } from "@/contexts/CheckoutContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Layout } from "@/components/layout/Layout";
 import HomePage from "./pages/HomePage";
@@ -13,6 +14,10 @@ import StationeryPage from "./pages/StationeryPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import DeliveryMethodPage from "./pages/DeliveryMethodPage";
+import BranchSelectionPage from "./pages/BranchSelectionPage";
+import PaymentPage from "./pages/PaymentPage";
+import OrderSuccessPage from "./pages/OrderSuccessPage";
 import { 
   PrivacyPolicyPage, 
   TermsConditionsPage, 
@@ -31,9 +36,10 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <CheckoutProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
@@ -47,6 +53,10 @@ const App = () => (
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/delivery-method" element={<DeliveryMethodPage />} />
+                <Route path="/branch-selection" element={<BranchSelectionPage />} />
+                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/order-success" element={<OrderSuccessPage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms-conditions" element={<TermsConditionsPage />} />
                 <Route path="/refund-policy" element={<RefundPolicyPage />} />
@@ -56,6 +66,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          </CheckoutProvider>
         </CartProvider>
       </TooltipProvider>
     </QueryClientProvider>

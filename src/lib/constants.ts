@@ -49,6 +49,10 @@ export const ROUTES = {
   STATIONERY: "/stationery",
   BLOG: "/blog",
   CHECKOUT: "/checkout",
+  DELIVERY_METHOD: "/delivery-method",
+  BRANCH_SELECTION: "/branch-selection",
+  PAYMENT: "/payment",
+  ORDER_SUCCESS: "/order-success",
 } as const;
 
 // Navigation menu structure
