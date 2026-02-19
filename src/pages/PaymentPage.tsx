@@ -7,18 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { useCheckout } from "@/contexts/CheckoutContext";
-import { ArrowLeft, CreditCard, Banknote, Store, Copy, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CreditCard, Banknote, Store, Copy, CheckCircle2, Loader2 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 import { Link } from "react-router-dom";
+import { createOrder } from "@/services/orders";
+import { toast } from "sonner";
 
 const PaymentPage = () => {
   const { items, getTotal, clearCart } = useCart();
   const { checkoutState, setPaymentMethod, setPaymentCompleted } = useCheckout();
   const navigate = useNavigate();
   const [copied, setCopied] = useState<string | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const total = getTotal();
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!checkoutState.paymentMethod) {
       return;
     }
@@ -27,11 +30,31 @@ const PaymentPage = () => {
       return;
     }
 
-    // Clear cart (checkout state will be cleared after success page)
-    clearCart();
-    
-    // Navigate to success page
-    navigate(ROUTES.ORDER_SUCCESS);
+    setIsPlacingOrder(true);
+    try {
+      const orderId = await createOrder({
+        cartItems: items,
+        deliveryMethod: checkoutState.deliveryMethod!,
+        branch: checkoutState.deliveryMethod === "pickup" && checkoutState.selectedBranch
+          ? {
+              id: checkoutState.selectedBranch.id,
+              name: checkoutState.selectedBranch.name,
+              address: checkoutState.selectedBranch.address,
+            }
+          : null,
+        paymentMethod: checkoutState.paymentMethod,
+        formData: checkoutState.formData,
+        total,
+      });
+
+      clearCart();
+      navigate(ROUTES.ORDER_SUCCESS, { state: { orderId } });
+    } catch (error) {
+      console.error("Failed to place order:", error);
+      toast.error("Failed to place order. Please try again.");
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   const handlePaymentMethodChange = (value: string) => {
@@ -262,11 +285,19 @@ const PaymentPage = () => {
                   className="w-full mt-6"
                   size="lg"
                   disabled={
+                    isPlacingOrder ||
                     !checkoutState.paymentMethod ||
                     (checkoutState.paymentMethod === "online" && !checkoutState.paymentCompleted)
                   }
                 >
-                  Place Order
+                  {isPlacingOrder ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Placing Order...
+                    </>
+                  ) : (
+                    "Place Order"
+                  )}
                 </Button>
               </CardContent>
             </Card>

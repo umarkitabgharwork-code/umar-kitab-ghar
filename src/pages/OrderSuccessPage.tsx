@@ -1,15 +1,24 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useCheckout } from "@/contexts/CheckoutContext";
-import { CheckCircle2, Package, Store, CreditCard, Banknote, ShoppingBag } from "lucide-react";
+import { CheckCircle2, Package, Store, CreditCard, Banknote, ShoppingBag, Hash } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { Link } from "react-router-dom";
 
 const OrderSuccessPage = () => {
   const { checkoutState, clearCheckout } = useCheckout();
   const navigate = useNavigate();
+  const location = useLocation();
+  const orderId = (location.state as { orderId?: string } | null)?.orderId;
+
+  // Redirect to home if no checkout data and no order ID (e.g. direct URL access)
+  useEffect(() => {
+    if (!orderId && (!checkoutState.deliveryMethod || !checkoutState.paymentMethod)) {
+      navigate(ROUTES.HOME, { replace: true });
+    }
+  }, [orderId, checkoutState.deliveryMethod, checkoutState.paymentMethod, navigate]);
 
   const handleContinueShopping = () => {
     clearCheckout();
@@ -49,11 +58,8 @@ const OrderSuccessPage = () => {
     }
   };
 
-  // If no checkout data, redirect to home
-  if (!checkoutState.deliveryMethod || !checkoutState.paymentMethod) {
-    useEffect(() => {
-      navigate(ROUTES.HOME);
-    }, [navigate]);
+  // Show nothing while redirecting
+  if (!orderId && (!checkoutState.deliveryMethod || !checkoutState.paymentMethod)) {
     return null;
   }
 
@@ -80,6 +86,16 @@ const OrderSuccessPage = () => {
 
               <div className="text-left space-y-4">
                 <h2 className="text-xl font-semibold">Order Confirmation</h2>
+                
+                {orderId && (
+                  <div className="flex items-center justify-between p-4 bg-primary/10 border-2 border-primary/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Hash className="h-5 w-5 text-primary" />
+                      <span className="font-semibold">Order ID:</span>
+                    </div>
+                    <span className="text-lg font-mono font-bold tracking-wider">{orderId}</span>
+                  </div>
+                )}
                 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
