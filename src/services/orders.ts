@@ -44,6 +44,21 @@ export async function createOrder(params: {
     throw new Error("Cart is empty");
   }
 
+  if (!params.formData.name?.trim() || !params.formData.primaryPhone?.trim()) {
+    console.error("Missing required customer info for order:", {
+      name: params.formData.name,
+      primaryPhone: params.formData.primaryPhone,
+    });
+    throw new Error("Please provide your name and phone number");
+  }
+
+  if (params.deliveryMethod === "delivery" && !params.formData.address?.trim()) {
+    console.error("Missing address for delivery order:", {
+      address: params.formData.address,
+    });
+    throw new Error("Please provide a delivery address");
+  }
+
   const orderCode = "UKG-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
   const bookIds = params.cartItems.map((item) => item.id);
@@ -122,7 +137,7 @@ export async function createOrder(params: {
 
   if (orderError) {
     console.error("Order insert error:", orderError);
-    throw new Error("Failed to create order");
+    throw new Error(orderError.message || "Failed to create order");
   }
 
   const orderId = orderData.id;
@@ -141,7 +156,7 @@ export async function createOrder(params: {
 
   if (itemsError) {
     console.error("Order items insert error:", itemsError);
-    throw new Error("Failed to insert order items");
+    throw new Error(itemsError.message || "Failed to insert order items");
   }
 
   // ===== RECORD COUPON USAGE =====

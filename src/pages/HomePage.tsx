@@ -5,16 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  BookOpen, 
-  GraduationCap, 
-  ShoppingBag, 
-  FileText, 
-  BookMarked,
-  Palette,
-  FolderOpen,
-  Notebook,
-  Pencil,
+import {
+  BookOpen,
+  FileText,
   Clock,
   Truck,
   ArrowRight,
@@ -22,52 +15,21 @@ import {
   BadgeDollarSign,
   Sparkles,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
-import { getActiveBanners, getActiveDeals, getBestSellerBooks, getPublishedBlogPosts, getTrendingBooks, type Banner } from "@/services/api";
+import {
+  getActiveBanners,
+  getActiveDeals,
+  getBestSellerBooks,
+  getNavCategories,
+  getPublishedBlogPosts,
+  getTrendingBooks,
+  type Banner,
+  type NavCategory,
+} from "@/services/api";
 import { supabase } from "@/lib/supabase";
 import { TestimonialSlider, type Review as StoreReview } from "@/components/TestimonialSlider";
-
-const mainActions = [
-  {
-    icon: GraduationCap,
-    title: "Buy Full School Course",
-    description: "Complete book sets for any class from Nursery to 10th",
-    href: ROUTES.BUY_COURSE,
-    color: "bg-primary",
-  },
-  {
-    icon: BookOpen,
-    title: "Buy Single Book",
-    description: "Find and order individual books or items",
-    href: ROUTES.DEALS,
-    color: "bg-accent",
-  },
-  {
-    icon: ShoppingBag,
-    title: "Browse Stationery",
-    description: "Explore notebooks, art supplies, and more",
-    href: ROUTES.STATIONERY,
-    color: "bg-primary",
-  },
-  {
-    icon: FileText,
-    title: "Read Our Blog",
-    description: "Tips, guides, and educational content",
-    href: ROUTES.BLOG,
-    color: "bg-accent",
-  },
-];
-
-const categories = [
-  { icon: BookMarked, name: "Islamic Books", href: "/stationery/islamic-books" },
-  { icon: BookOpen, name: "Novels", href: "/stationery/novels" },
-  { icon: Palette, name: "Colors & Markers", href: "/stationery/colors-markers" },
-  { icon: FolderOpen, name: "Files & Folders", href: "/stationery/files-folders" },
-  { icon: Pencil, name: "Art Supplies", href: "/stationery/art-supplies" },
-  { icon: Notebook, name: "Notebooks", href: "/stationery/notebooks" },
-];
 
 const features = [
   { icon: Star, title: "Quality Products", description: "Original books and premium stationery" },
@@ -93,6 +55,7 @@ const HomePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isBannerHovered, setIsBannerHovered] = useState(false);
   const [isFading, setIsFading] = useState(false);
+  const [categoryScrollIndex, setCategoryScrollIndex] = useState(0);
 
   const { data: bannersResponse } = useQuery({
     queryKey: ["activeBanners"],
@@ -192,6 +155,29 @@ const HomePage = () => {
       return (data ?? []) as StoreReview[];
     },
   });
+
+  const {
+    data: navCategoriesResponse = [],
+  } = useQuery({
+    queryKey: ["homeNavCategories"],
+    queryFn: async () => {
+      const res = await getNavCategories();
+      if (!res.success) return [] as NavCategory[];
+      return res.data.filter(
+        (c) => c.slug !== "home" && c.slug !== "track-order"
+      );
+    },
+  });
+
+  const navCategories = navCategoriesResponse as NavCategory[];
+
+  useEffect(() => {
+    if (navCategories.length <= 1) return;
+    const id = window.setInterval(() => {
+      setCategoryScrollIndex((prev) => (prev + 1) % navCategories.length);
+    }, 3500);
+    return () => window.clearInterval(id);
+  }, [navCategories.length]);
 
   return (
     <div className="flex flex-col">
@@ -527,67 +513,98 @@ const HomePage = () => {
       </section>
 
       {/* Main Action Cards */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Would You Like to Do?</h2>
-            <p className="text-muted-foreground">
-              Choose from our range of services to find exactly what you need for your educational journey.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mainActions.map((action, index) => (
-              <Link key={action.href} to={action.href}>
-                <Card 
-                  variant="interactive" 
-                  className="h-full"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <CardContent className="p-6 flex gap-4">
-                    <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${action.color} flex items-center justify-center`}>
-                      <action.icon className="h-7 w-7 text-primary-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{action.title}</h3>
-                      <p className="text-muted-foreground">{action.description}</p>
-                    </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground self-center" />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Categories */}
       <section className="py-16 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Browse Categories</h2>
-            <p className="text-muted-foreground">
-              Explore our wide range of stationery and educational materials.
-            </p>
+          <div className="flex items-center justify-between mb-6">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">Browse Categories</h2>
+              <p className="text-muted-foreground">
+                Explore our full catalog of books, stationery, and educational materials.
+              </p>
+            </div>
+            {navCategories.length > 0 && (
+              <div className="hidden md:flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() =>
+                    setCategoryScrollIndex((prev) =>
+                      prev === 0 ? navCategories.length - 1 : prev - 1
+                    )
+                  }
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  onClick={() =>
+                    setCategoryScrollIndex((prev) => (prev + 1) % navCategories.length)
+                  }
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((category, index) => (
-              <Link key={category.href} to={category.href}>
-                <Card 
-                  variant="interactive" 
-                  className="text-center py-6 h-full"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <CardContent className="p-4 space-y-3">
-                    <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                      <category.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 className="font-medium text-sm">{category.name}</h3>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+          <div className="relative">
+            <div className="overflow-x-auto no-scrollbar">
+              <div
+                className="flex gap-4 transition-transform duration-500 ease-out"
+                style={{
+                  transform:
+                    navCategories.length > 0
+                      ? `translateX(-${Math.min(
+                          categoryScrollIndex,
+                          Math.max(0, navCategories.length - 1)
+                        ) * 260}px)`
+                      : undefined,
+                }}
+              >
+                {navCategories.map((category) => (
+                  <Link
+                    key={category.id}
+                    to={`/stationery/${category.slug}`}
+                    className="min-w-[220px] max-w-[260px]"
+                  >
+                    <Card variant="interactive" className="h-full">
+                      <CardContent className="p-5 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="font-semibold text-base line-clamp-2">
+                            {category.name}
+                          </h3>
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs">
+                            <ArrowRight className="h-3 w-3" />
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          Discover books and stationery in {category.name}.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+                {navCategories.length === 0 && (
+                  <div className="flex gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <Card key={i} className="min-w-[220px] max-w-[260px]">
+                        <CardContent className="p-5 space-y-3">
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-3 w-full" />
+                          <Skeleton className="h-3 w-3/4" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
