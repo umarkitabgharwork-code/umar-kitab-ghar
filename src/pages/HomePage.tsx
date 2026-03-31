@@ -55,7 +55,6 @@ const HomePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isBannerHovered, setIsBannerHovered] = useState(false);
   const [isFading, setIsFading] = useState(false);
-  const [categoryScrollIndex, setCategoryScrollIndex] = useState(0);
 
   const { data: bannersResponse } = useQuery({
     queryKey: ["activeBanners"],
@@ -174,7 +173,16 @@ const HomePage = () => {
   useEffect(() => {
     if (navCategories.length <= 1) return;
     const id = window.setInterval(() => {
-      setCategoryScrollIndex((prev) => (prev + 1) % navCategories.length);
+      const container = document.querySelector<HTMLDivElement>("#home-category-scroll");
+      if (!container) return;
+      const cardWidth = 260;
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+      const nextLeft = container.scrollLeft + cardWidth;
+      if (nextLeft >= maxScrollLeft) {
+        container.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        container.scrollBy({ left: cardWidth, behavior: "smooth" });
+      }
     }, 3500);
     return () => window.clearInterval(id);
   }, [navCategories.length]);
@@ -530,11 +538,12 @@ const HomePage = () => {
                   variant="outline"
                   size="icon"
                   className="rounded-full"
-                  onClick={() =>
-                    setCategoryScrollIndex((prev) =>
-                      prev === 0 ? navCategories.length - 1 : prev - 1
-                    )
-                  }
+                  onClick={() => {
+                    const container = document.querySelector<HTMLDivElement>("#home-category-scroll");
+                    if (!container) return;
+                    const cardWidth = 260;
+                    container.scrollBy({ left: -cardWidth, behavior: "smooth" });
+                  }}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -543,9 +552,12 @@ const HomePage = () => {
                   variant="outline"
                   size="icon"
                   className="rounded-full"
-                  onClick={() =>
-                    setCategoryScrollIndex((prev) => (prev + 1) % navCategories.length)
-                  }
+                  onClick={() => {
+                    const container = document.querySelector<HTMLDivElement>("#home-category-scroll");
+                    if (!container) return;
+                    const cardWidth = 260;
+                    container.scrollBy({ left: cardWidth, behavior: "smooth" });
+                  }}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -554,23 +566,15 @@ const HomePage = () => {
           </div>
 
           <div className="relative">
-            <div className="overflow-x-auto no-scrollbar">
+            <div className="overflow-hidden">
               <div
-                className="flex gap-4 transition-transform duration-500 ease-out"
-                style={{
-                  transform:
-                    navCategories.length > 0
-                      ? `translateX(-${Math.min(
-                          categoryScrollIndex,
-                          Math.max(0, navCategories.length - 1)
-                        ) * 260}px)`
-                      : undefined,
-                }}
+                id="home-category-scroll"
+                className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth"
               >
                 {navCategories.map((category) => (
                   <Link
                     key={category.id}
-                    to={`/stationery/${category.slug}`}
+                    to={`/category/${category.slug}`}
                     className="min-w-[220px] max-w-[260px]"
                   >
                     <Card variant="interactive" className="h-full">

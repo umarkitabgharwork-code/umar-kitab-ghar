@@ -70,7 +70,11 @@ const PaymentPage = () => {
       navigate(ROUTES.ORDER_SUCCESS, { state: { orderCode } });
     } catch (error) {
       console.error("Failed to place order:", error);
-      toast.error("Failed to place order. Please try again.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to place order. Please try again.";
+      toast.error(message);
     } finally {
       setIsPlacingOrder(false);
     }

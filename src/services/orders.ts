@@ -91,47 +91,39 @@ export async function createOrder(params: {
       ? `https://www.google.com/maps?q=${params.formData.latitude},${params.formData.longitude}`
       : null;
 
-  // ✅ INSERT ORDER (FIXED)
+  const orderPayload = {
+    order_code: orderCode,
+    customer_name: params.formData.name,
+    phone: params.formData.primaryPhone,
+    delivery_method: params.deliveryMethod,
+    payment_method: params.paymentMethod,
+    branch:
+      params.deliveryMethod === "pickup"
+        ? params.branch?.name || null
+        : null,
+    address: params.formData.address || null,
+    latitude:
+      params.deliveryMethod === "delivery"
+        ? params.formData.latitude || null
+        : null,
+    longitude:
+      params.deliveryMethod === "delivery"
+        ? params.formData.longitude || null
+        : null,
+    google_maps_url:
+      params.deliveryMethod === "delivery"
+        ? googleMapsUrl
+        : null,
+    total_amount: params.total,
+    status: "pending",
+    coupon_id: params.couponId || null,
+  };
+
+  console.log("[createOrder] Inserting order with payload:", orderPayload);
+
   const { data: orderData, error: orderError } = await supabase
     .from("orders")
-    .insert([
-      {
-        order_code: orderCode,
-        customer_name: params.formData.name,
-        phone: params.formData.primaryPhone,
-
-        // 🔥 IMPORTANT ADDITIONS
-        delivery_method: params.deliveryMethod,
-        payment_method: params.paymentMethod,
-
-        branch:
-          params.deliveryMethod === "pickup"
-            ? params.branch?.name || null
-            : null,
-
-        address:
-          params.formData.address || null,
-
-        latitude:
-          params.deliveryMethod === "delivery"
-            ? params.formData.latitude || null
-            : null,
-
-        longitude:
-          params.deliveryMethod === "delivery"
-            ? params.formData.longitude || null
-            : null,
-
-        google_maps_url:
-          params.deliveryMethod === "delivery"
-            ? googleMapsUrl
-            : null,
-
-        total_amount: params.total,
-        status: "pending",
-        coupon_id: params.couponId || null,
-      },
-    ])
+    .insert([orderPayload])
     .select()
     .single();
 
@@ -142,6 +134,8 @@ export async function createOrder(params: {
 
   const orderId = orderData.id;
 
+  console.log("[createOrder] Created order with ID:", orderId);
+
   // ✅ INSERT ORDER ITEMS
   const orderItemsPayload = params.cartItems.map((item) => ({
     order_id: orderId,
@@ -149,6 +143,8 @@ export async function createOrder(params: {
     quantity: item.quantity,
     price_at_time: item.price,
   }));
+
+  console.log("[createOrder] Inserting order items:", orderItemsPayload);
 
   const { error: itemsError } = await supabase
     .from("order_items")
