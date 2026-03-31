@@ -35,6 +35,7 @@ export interface Product {
   image?: string;
   description?: string;
   inStock?: boolean;
+  stock?: number;
 }
 
 // Category type - represents product categories
@@ -58,6 +59,16 @@ export interface BlogPost {
   readTime: string;
   slug: string;
   content?: string;
+}
+
+// Blog post from Supabase (blog_posts table)
+export interface BlogPostRow {
+  id: string;
+  title: string;
+  slug: string;
+  image_url: string | null;
+  content: string | null;
+  created_at: string;
 }
 
 // Cart item type - matches CartContext but exported here for API layer

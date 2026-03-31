@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useCart } from "@/contexts/CartContext";
 import { useCheckout } from "@/contexts/CheckoutContext";
-import { ArrowLeft, ShoppingCart, MapPin, Loader2, AlertCircle } from "lucide-react";
+import { getProductStock, validateCoupon } from "@/services/api";
+import { toast } from "@/hooks/use-toast";
+import { ShoppingCart, MapPin, Loader2, AlertCircle, Tag, X } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
 
 // Mock reverse geocoding function
@@ -20,14 +22,76 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
 };
 
 const CheckoutPage = () => {
-  const { items, getTotal } = useCart();
-  const { checkoutState, updateFormData } = useCheckout();
+  const { items, getTotal, updateQuantity, removeItem } = useCart();
+  const { checkoutState, updateFormData, setAppliedCoupon } = useCheckout();
   const navigate = useNavigate();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
   const formData = checkoutState.formData;
-  const total = getTotal();
+  const subtotal = getTotal();
+  const discountAmount = checkoutState.appliedCoupon?.discountAmount ?? 0;
+  const total = Math.max(0, subtotal - discountAmount);
+
+  const courseItem = items.find((item) => item.type === "course");
+
+  // Validate cart items against latest stock on cart page load
+  useEffect(() => {
+    let cancelled = false;
+
+    const isProbablyBookId = (id: string): boolean => {
+      // Supabase book IDs are typically UUIDs; skip non-UUID IDs (e.g. course bundle items)
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    };
+
+    const validateCart = async () => {
+      if (items.length === 0) return;
+
+      const validations = await Promise.all(
+        items.map(async (item) => {
+          if (!isProbablyBookId(item.id)) {
+            return { id: item.id, currentQty: item.quantity, latestStock: null as number | null };
+          }
+          const stockResponse = await getProductStock(item.id);
+          const latestStock = stockResponse.success ? stockResponse.data.stock : 0;
+          return { id: item.id, currentQty: item.quantity, latestStock };
+        })
+      );
+
+      if (cancelled) return;
+
+      let didChange = false;
+      for (const v of validations) {
+        if (v.latestStock === null) continue;
+        if (v.latestStock <= 0) {
+          if (v.currentQty !== 0) {
+            updateQuantity(v.id, 0);
+            didChange = true;
+          }
+          continue;
+        }
+
+        if (v.currentQty > v.latestStock) {
+          updateQuantity(v.id, v.latestStock);
+          didChange = true;
+        }
+      }
+
+      if (didChange) {
+        toast({
+          description: "Cart updated due to stock change.",
+        });
+      }
+    };
+
+    validateCart();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [items, updateQuantity]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +165,38 @@ const CheckoutPage = () => {
     );
   };
 
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) {
+      toast({ variant: "destructive", description: "Please enter a coupon code." });
+      return;
+    }
+    if (subtotal <= 0) {
+      toast({ variant: "destructive", description: "Add items to cart first." });
+      return;
+    }
+    setIsValidatingCoupon(true);
+    const res = await validateCoupon(code, subtotal);
+    setIsValidatingCoupon(false);
+    if (!res.success) {
+      toast({ variant: "destructive", description: res.message });
+      return;
+    }
+    if (res.data) {
+      setAppliedCoupon({
+        couponId: res.data.couponId,
+        code: res.data.code,
+        discountAmount: res.data.discountAmount,
+      });
+      toast({ description: `Coupon applied. You save Rs. ${res.data.discountAmount}.` });
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+  };
+
   // Generate map embed URL (using OpenStreetMap)
   const getMapEmbedUrl = (): string | null => {
     if (formData.latitude && formData.longitude) {
@@ -121,7 +217,7 @@ const CheckoutPage = () => {
                 Add some items to your cart before checking out.
               </p>
               <Button asChild>
-                <Link to="/buy-book">Continue Shopping</Link>
+                <Link to="/">Continue Shopping</Link>
               </Button>
             </CardContent>
           </Card>
@@ -133,13 +229,6 @@ const CheckoutPage = () => {
   return (
     <div className="py-8 md:py-12">
       <div className="container max-w-4xl">
-        <Button asChild variant="ghost" className="mb-6">
-          <Link to="/buy-book">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Shopping
-          </Link>
-        </Button>
-
         <div className="grid md:grid-cols-3 gap-8">
           {/* Customer Information Form */}
           <div className="md:col-span-2">
@@ -165,13 +254,16 @@ const CheckoutPage = () => {
                       id="primaryPhone"
                       name="primaryPhone"
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={formData.primaryPhone}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, "");
+                        updateFormData({ primaryPhone: value });
+                      }}
                       required
-                      placeholder="03XX-XXXXXXX"
-                      pattern="[0-9]{4}-[0-9]{7}"
+                      placeholder="03001234567"
                     />
-                    <p className="text-xs text-muted-foreground">Format: 03XX-XXXXXXX</p>
                   </div>
 
                   <div className="space-y-2">
@@ -180,10 +272,14 @@ const CheckoutPage = () => {
                       id="secondaryPhone"
                       name="secondaryPhone"
                       type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={formData.secondaryPhone}
-                      onChange={handleInputChange}
-                      placeholder="03XX-XXXXXXX"
-                      pattern="[0-9]{4}-[0-9]{7}"
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, "");
+                        updateFormData({ secondaryPhone: value });
+                      }}
+                      placeholder="03001234567"
                     />
                   </div>
 
@@ -268,27 +364,152 @@ const CheckoutPage = () => {
               <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold">Order Summary</h3>
 
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <div className="flex-1">
-                        <div className="font-medium">{item.name}</div>
-                        <div className="text-muted-foreground">
-                          Rs. {item.price} × {item.quantity}
-                        </div>
-                      </div>
-                      <div className="font-semibold">
-                        Rs. {item.price * item.quantity}
-                      </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="coupon" className="text-sm font-medium flex items-center gap-1">
+                      <Tag className="h-4 w-4" />
+                      Coupon
+                    </Label>
+                  </div>
+                  {checkoutState.appliedCoupon ? (
+                    <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm">
+                      <span className="font-medium">{checkoutState.appliedCoupon.code}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-muted-foreground"
+                        onClick={handleRemoveCoupon}
+                        aria-label="Remove coupon"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        id="coupon"
+                        placeholder="Enter code"
+                        value={couponInput}
+                        onChange={(e) => setCouponInput(e.target.value)}
+                        className="h-9"
+                        disabled={isValidatingCoupon}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 shrink-0"
+                        onClick={handleApplyCoupon}
+                        disabled={isValidatingCoupon || !couponInput.trim()}
+                      >
+                        {isValidatingCoupon ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Apply"
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
-                <div className="border-t pt-4">
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {courseItem ? (
+                    <div className="space-y-3 text-sm">
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">School</span>
+                          <span className="font-medium">{courseItem.schoolName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Class</span>
+                          <span className="font-medium">{courseItem.className}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Course Type</span>
+                          <span className="font-medium capitalize">{courseItem.courseType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Quantity</span>
+                          <span className="font-medium">{courseItem.quantity}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-muted-foreground mb-1">Books included:</p>
+                        <ul className="list-disc list-inside space-y-0.5">
+                          {courseItem.books?.map((b) => (
+                            <li key={b.bookId}>{b.title}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="flex justify-between font-semibold">
+                        <span>Total Price</span>
+                        <span>Rs. {courseItem.price * courseItem.quantity}</span>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="px-0 h-auto text-xs text-destructive"
+                        onClick={() => removeItem(courseItem.id)}
+                      >
+                        Remove Course
+                      </Button>
+                    </div>
+                  ) : (
+                    items.map((item) => (
+                      <div key={item.id} className="space-y-1 text-sm">
+                        <div className="flex justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="font-medium">{item.name}</div>
+                            <div className="text-muted-foreground">
+                              Rs. {item.price} × {item.quantity}
+                            </div>
+                          </div>
+                          <div className="font-semibold">
+                            Rs. {item.price * item.quantity}
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="px-0 h-auto text-xs text-destructive"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>Rs. {subtotal}</span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Discount</span>
+                      <span>- Rs. {discountAmount}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
                     <span>Rs. {total}</span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => navigate(ROUTES.HOME)}
+                  >
+                    Continue Shopping
+                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -11,14 +11,14 @@ const OrderSuccessPage = () => {
   const { checkoutState, clearCheckout } = useCheckout();
   const navigate = useNavigate();
   const location = useLocation();
-  const orderId = (location.state as { orderId?: string } | null)?.orderId;
+  const orderCode = (location.state as { orderCode?: string } | null)?.orderCode;
 
   // Redirect to home if no checkout data and no order ID (e.g. direct URL access)
   useEffect(() => {
-    if (!orderId && (!checkoutState.deliveryMethod || !checkoutState.paymentMethod)) {
+    if (!orderCode && (!checkoutState.deliveryMethod || !checkoutState.paymentMethod)) {
       navigate(ROUTES.HOME, { replace: true });
     }
-  }, [orderId, checkoutState.deliveryMethod, checkoutState.paymentMethod, navigate]);
+  }, [orderCode, checkoutState.deliveryMethod, checkoutState.paymentMethod, navigate]);
 
   const handleContinueShopping = () => {
     clearCheckout();
@@ -59,7 +59,7 @@ const OrderSuccessPage = () => {
   };
 
   // Show nothing while redirecting
-  if (!orderId && (!checkoutState.deliveryMethod || !checkoutState.paymentMethod)) {
+  if (!orderCode && (!checkoutState.deliveryMethod || !checkoutState.paymentMethod)) {
     return null;
   }
 
@@ -87,13 +87,13 @@ const OrderSuccessPage = () => {
               <div className="text-left space-y-4">
                 <h2 className="text-xl font-semibold">Order Confirmation</h2>
                 
-                {orderId && (
+                {orderCode && (
                   <div className="flex items-center justify-between p-4 bg-primary/10 border-2 border-primary/30 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Hash className="h-5 w-5 text-primary" />
-                      <span className="font-semibold">Order ID:</span>
+                      <span className="font-semibold">Order Code:</span>
                     </div>
-                    <span className="text-lg font-mono font-bold tracking-wider">{orderId}</span>
+                    <span className="text-lg font-mono font-bold tracking-wider">{orderCode}</span>
                   </div>
                 )}
                 

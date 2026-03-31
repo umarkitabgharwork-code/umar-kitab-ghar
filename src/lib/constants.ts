@@ -30,22 +30,8 @@ export const CLASSES = [
 export const ROUTES = {
   HOME: "/",
   NEW_DEAL: "/new-deal",
+  DEALS: "/deals",
   BUY_COURSE: "/buy-course",
-  BUY_BOOK: "/buy-book",
-  BOOKS_ISLAMIC: "/books/islamic",
-  BOOKS_STUDY: "/books/study",
-  BOOKS_NOVEL: "/books/novel",
-  OTHER_GIFT: "/other/gift",
-  OTHER_BIRTHDAY: "/other/birthday",
-  OTHER_ART_CRAFT: "/other/art-craft",
-  OTHER_SKETCHING: "/other/sketching",
-  OTHER_PAINTING: "/other/painting",
-  OTHER_TOYS: "/other/toys",
-  OTHER_BAGS: "/other/bags",
-  OTHER_GEOMETRY_BOX: "/other/geometry-box",
-  OTHER_PENCIL_BOX: "/other/pencil-box",
-  OTHER_DIARIES: "/other/diaries",
-  OTHER_CUSTOMIZE: "/other/customize",
   STATIONERY: "/stationery",
   BLOG: "/blog",
   CHECKOUT: "/checkout",
@@ -53,6 +39,9 @@ export const ROUTES = {
   BRANCH_SELECTION: "/branch-selection",
   PAYMENT: "/payment",
   ORDER_SUCCESS: "/order-success",
+  TRACK_ORDER: "/track-order",
+  ACCOUNT: "/account",
+  WISHLIST: "/wishlist",
 } as const;
 
 // Navigation menu structure
@@ -64,33 +53,16 @@ export interface NavMenuItem {
 
 export const NAV_MENU_ITEMS: NavMenuItem[] = [
   { label: "Home", href: ROUTES.HOME },
-  { label: "New Deal", href: ROUTES.NEW_DEAL },
-  { label: "Buy Course", href: ROUTES.BUY_COURSE },
+  { label: "Deals", href: ROUTES.DEALS },
+  { label: "Course", href: ROUTES.BUY_COURSE },
   {
-    label: "Buy Book",
-    children: [
-      { label: "Islamic Books", href: ROUTES.BOOKS_ISLAMIC },
-      { label: "Study Books", href: ROUTES.BOOKS_STUDY },
-      { label: "Novel Books", href: ROUTES.BOOKS_NOVEL },
-    ],
+    label: "Book",
   },
   {
     label: "Other Items",
-    children: [
-      { label: "Gift Items", href: ROUTES.OTHER_GIFT },
-      { label: "Birthday Items", href: ROUTES.OTHER_BIRTHDAY },
-      { label: "Art & Craft", href: ROUTES.OTHER_ART_CRAFT },
-      { label: "Sketching", href: ROUTES.OTHER_SKETCHING },
-      { label: "Painting & Canvas", href: ROUTES.OTHER_PAINTING },
-      { label: "Toy Items", href: ROUTES.OTHER_TOYS },
-      { label: "Bags", href: ROUTES.OTHER_BAGS },
-      { label: "Geometry Box", href: ROUTES.OTHER_GEOMETRY_BOX },
-      { label: "Pencil Box", href: ROUTES.OTHER_PENCIL_BOX },
-      { label: "Diaries", href: ROUTES.OTHER_DIARIES },
-      { label: "Customize Item", href: ROUTES.OTHER_CUSTOMIZE },
-    ],
   },
   { label: "Blog", href: ROUTES.BLOG },
+  { label: "Track Order", href: ROUTES.TRACK_ORDER },
 ];
 
 // Course Types

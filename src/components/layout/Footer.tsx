@@ -1,22 +1,19 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Phone, MapPin } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const footerLinks = {
   quickLinks: [
-    { href: "/buy-course", label: "Buy Full Course" },
-    { href: "/buy-book", label: "Buy Single Book" },
-    { href: "/stationery", label: "Stationery" },
-    { href: "/blog", label: "Blog" },
-  ],
-  categories: [
-    { href: "/stationery/islamic-books", label: "Islamic Books" },
-    { href: "/stationery/novels", label: "Novels" },
-    { href: "/stationery/notebooks", label: "Notebooks" },
-    { href: "/stationery/art-supplies", label: "Art Supplies" },
+    { href: "/", label: "Home" },
+    { href: "/deals", label: "Deals" },
+    { href: "/deals", label: "Books" },
+    { href: "/buy-course", label: "Courses" },
+    { href: "/trending", label: "Trending" },
+    { href: "/best-sellers", label: "Best Sellers" },
+    { href: "/reviews", label: "Reviews" },
   ],
   legal: [
     { href: "/privacy-policy", label: "Privacy Policy" },
-    { href: "/terms-conditions", label: "Terms & Conditions" },
+    { href: "/terms", label: "Terms & Conditions" },
     { href: "/refund-policy", label: "Refund Policy" },
     { href: "/shipping-policy", label: "Shipping Policy" },
     { href: "/disclaimer", label: "Disclaimer" },
@@ -25,74 +22,62 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="border-t bg-card">
-      {/* Ad Placeholder */}
-      <div className="border-b">
-        <div className="container py-4">
-          <div className="flex items-center justify-center h-24 rounded-lg border-2 border-dashed border-muted-foreground/20 bg-secondary/50">
-            <span className="text-sm text-muted-foreground">Ad Space</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <BookOpen className="h-6 w-6 text-primary-foreground" />
+    <footer className="border-t border-white/10 bg-[#0b1a4a]">
+      <div className="container py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* About + Branches */}
+          <div className="md:col-span-2 lg:col-span-2 space-y-4 max-w-prose">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-transparent">
+                <img
+                  src={logo}
+                  alt="Umar Kitab Ghar"
+                  className="h-9 w-auto object-contain"
+                  loading="lazy"
+                />
               </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold">Umar Kitab Ghar</span>
-                <span className="text-xs text-muted-foreground">Your Book Store</span>
+              <div className="flex min-w-0 flex-col text-left">
+                <span className="text-base font-bold leading-tight text-white">Umar Kitab Ghar</span>
+                <span className="text-xs text-gray-400">Serving since 1988</span>
               </div>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Your one-stop shop for school books, stationery, and educational materials. Quality products at affordable prices.
-            </p>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>123 Book Street, City</span>
+
+            <div className="space-y-3 text-sm text-gray-300">
+              <h3 className="text-sm font-semibold text-white">Branches</h3>
+
+              <div className="rounded-md border border-white/10 bg-white/5 p-2.5 space-y-1 text-gray-300">
+                <div className="font-medium text-gray-300">Branch 1</div>
+                <div>Landhi No 1</div>
+                <div>Near Noor Manzil</div>
+                <div>In front of Baldia School</div>
+                <div className="text-yellow-400 font-medium">📞 03182166630</div>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>+92 300 1234567</span>
+
+              <div className="rounded-md border border-white/10 bg-white/5 p-2.5 space-y-1 text-gray-300">
+                <div className="font-medium text-gray-300">Branch 2</div>
+                <div>Malir 15, Jamia Millia, Aswan Town</div>
+                <div>Near Taj Masjid</div>
+                <div className="text-yellow-400 font-medium">📞 03172108717</div>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                <span>info@umerkitabghar.com</span>
+
+              <div className="rounded-md border border-white/10 bg-white/5 p-2.5 space-y-1 text-gray-300">
+                <div className="font-medium text-gray-300">Branch 3</div>
+                <div>Korangi 4, Zaman Town</div>
+                <div>Near Abu Zar Bakery</div>
+                <div className="text-yellow-400 font-medium">📞 03196275304</div>
               </div>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-white">Quick Links</h3>
+            <ul className="space-y-1.5">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h4 className="font-semibold mb-4">Categories</h4>
-            <ul className="space-y-2">
-              {footerLinks.categories.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    className="text-sm text-gray-300 hover:text-white transition"
                   >
                     {link.label}
                   </Link>
@@ -102,14 +87,14 @@ export function Footer() {
           </div>
 
           {/* Legal */}
-          <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-white">Legal</h3>
+            <ul className="space-y-1.5">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    className="text-sm text-gray-300 hover:text-white transition"
                   >
                     {link.label}
                   </Link>
@@ -120,14 +105,12 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t">
-        <div className="container py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground text-center md:text-left">
+      <div className="border-t border-white/10">
+        <div className="container py-4 flex flex-col items-center justify-center gap-2 text-center">
+          <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} Umar Kitab Ghar. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground">
-            Made with ❤️ for education
-          </p>
+          <p className="text-sm text-gray-400">Made by Huzaifa Sheikh</p>
         </div>
       </div>
     </footer>

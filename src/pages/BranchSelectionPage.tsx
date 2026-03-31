@@ -51,7 +51,7 @@ const BranchSelectionPage = () => {
                 Add some items to your cart before checking out.
               </p>
               <Button asChild>
-                <Link to={ROUTES.BUY_BOOK}>Continue Shopping</Link>
+                <Link to={ROUTES.HOME}>Continue Shopping</Link>
               </Button>
             </CardContent>
           </Card>

@@ -1,5 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { CART_STORAGE_KEY } from "@/lib/constants";
+import { getProductStock } from "@/services/api";
+import { toast } from "@/hooks/use-toast";
+
+export interface CourseBookItem {
+  bookId: string;
+  title: string;
+  price: number;
+}
 
 export interface CartItem {
   id: string;
@@ -8,11 +16,17 @@ export interface CartItem {
   quantity: number;
   category?: string;
   image?: string;
+  type?: "book" | "course";
+  schoolName?: string;
+  className?: string;
+  courseType?: "new" | "old";
+  books?: CourseBookItem[];
+  pricePerCourse?: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -45,15 +59,85 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items]);
 
-  const addItem = (item: Omit<CartItem, "quantity">) => {
+  // Defensive hardening: ensure cart cannot keep inactive/unavailable products
+  useEffect(() => {
+    let cancelled = false;
+
+    const isProbablyBookId = (id: string): boolean => {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    };
+
+    const sanitize = async () => {
+      if (items.length === 0) return;
+
+      const validations = await Promise.all(
+        items.map(async (item) => {
+          if (!isProbablyBookId(item.id)) {
+            return { id: item.id, latestStock: null as number | null };
+          }
+          const stockRes = await getProductStock(item.id);
+          const latestStock = stockRes.success ? stockRes.data.stock : 0;
+          return { id: item.id, latestStock };
+        })
+      );
+
+      if (cancelled) return;
+
+      const stockById = new Map<string, number | null>();
+      validations.forEach((v) => stockById.set(v.id, v.latestStock));
+
+      let didChange = false;
+
+      setItems((prev) => {
+        const next: CartItem[] = [];
+        for (const item of prev) {
+          const latestStock = stockById.get(item.id);
+          if (latestStock === undefined || latestStock === null) {
+            next.push(item);
+            continue;
+          }
+
+          if (latestStock <= 0) {
+            didChange = true;
+            continue;
+          }
+
+          if (item.quantity > latestStock) {
+            didChange = true;
+            next.push({ ...item, quantity: latestStock });
+            continue;
+          }
+
+          next.push(item);
+        }
+        return next;
+      });
+
+      if (didChange) {
+        toast({
+          description: "Cart updated because some items are unavailable.",
+        });
+      }
+    };
+
+    sanitize();
+
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally run once on mount to sanitize localStorage cart
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const addItem = (item: Omit<CartItem, "quantity">, quantity: number = 1) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity }];
     });
   };
 

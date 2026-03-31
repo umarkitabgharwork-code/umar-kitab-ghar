@@ -12,14 +12,18 @@ import { ROUTES } from "@/lib/constants";
 import { Link } from "react-router-dom";
 import { createOrder } from "@/services/orders";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 const PaymentPage = () => {
   const { items, getTotal, clearCart } = useCart();
-  const { checkoutState, setPaymentMethod, setPaymentCompleted } = useCheckout();
+  const { checkoutState, setPaymentMethod, setPaymentCompleted, setPaymentScreenshotUrl } = useCheckout();
   const navigate = useNavigate();
   const [copied, setCopied] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const total = getTotal();
+  const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
+  const subtotal = getTotal();
+  const discountAmount = checkoutState.appliedCoupon?.discountAmount ?? 0;
+  const total = Math.max(0, subtotal - discountAmount);
 
   const handleContinue = async () => {
     if (!checkoutState.paymentMethod) {
@@ -32,7 +36,7 @@ const PaymentPage = () => {
 
     setIsPlacingOrder(true);
     try {
-      const orderId = await createOrder({
+      const orderCode = await createOrder({
         cartItems: items,
         deliveryMethod: checkoutState.deliveryMethod!,
         branch: checkoutState.deliveryMethod === "pickup" && checkoutState.selectedBranch
@@ -45,10 +49,25 @@ const PaymentPage = () => {
         paymentMethod: checkoutState.paymentMethod,
         formData: checkoutState.formData,
         total,
+        couponId: checkoutState.appliedCoupon?.couponId ?? null,
       });
 
+      // Attach payment screenshot + pending payment status (best-effort; does not change order creation flow)
+      if (checkoutState.paymentMethod === "online" && checkoutState.paymentScreenshotUrl) {
+        const { error } = await supabase
+          .from("orders")
+          .update({
+            payment_screenshot: checkoutState.paymentScreenshotUrl,
+            payment_status: "pending",
+          })
+          .eq("order_code", orderCode);
+        if (error) {
+          console.error("Failed to save payment screenshot:", error);
+        }
+      }
+
       clearCart();
-      navigate(ROUTES.ORDER_SUCCESS, { state: { orderId } });
+      navigate(ROUTES.ORDER_SUCCESS, { state: { orderCode } });
     } catch (error) {
       console.error("Failed to place order:", error);
       toast.error("Failed to place order. Please try again.");
@@ -68,7 +87,38 @@ const PaymentPage = () => {
   };
 
   const handlePaymentCompleted = () => {
+    if (checkoutState.paymentMethod === "online" && !checkoutState.paymentScreenshotUrl) {
+      toast.error("Please upload the payment screenshot first.");
+      return;
+    }
     setPaymentCompleted(true);
+  };
+
+  const handleScreenshotUpload = async (file: File) => {
+    setIsUploadingScreenshot(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const filePath = `payments/${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from("payment-screenshots")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        toast.error(uploadError.message);
+        return;
+      }
+
+      const { data: publicData } = supabase
+        .storage
+        .from("payment-screenshots")
+        .getPublicUrl(filePath);
+
+      setPaymentScreenshotUrl(publicData.publicUrl);
+      toast.success("Screenshot uploaded.");
+    } finally {
+      setIsUploadingScreenshot(false);
+    }
   };
 
   if (items.length === 0) {
@@ -82,7 +132,7 @@ const PaymentPage = () => {
                 Add some items to your cart before checking out.
               </p>
               <Button asChild>
-                <Link to={ROUTES.BUY_BOOK}>Continue Shopping</Link>
+                <Link to={ROUTES.HOME}>Continue Shopping</Link>
               </Button>
             </CardContent>
           </Card>
@@ -197,6 +247,32 @@ const PaymentPage = () => {
                   <div className="mt-6 p-6 border rounded-lg bg-muted/50 space-y-4">
                     <h3 className="font-semibold text-lg">Bank Transfer Details</h3>
                     <Separator />
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Upload payment screenshot</Label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void handleScreenshotUpload(file);
+                        }}
+                        disabled={isUploadingScreenshot}
+                        className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-accent file:text-accent-foreground hover:file:bg-accent/90"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Required to place order. Numbers only are already supported in the checkout form.
+                      </p>
+                      {checkoutState.paymentScreenshotUrl ? (
+                        <a
+                          href={checkoutState.paymentScreenshotUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-accent underline"
+                        >
+                          View uploaded screenshot
+                        </a>
+                      ) : null}
+                    </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Bank:</span>
@@ -322,7 +398,17 @@ const PaymentPage = () => {
                     </div>
                   ))}
                 </div>
-                <div className="border-t pt-4">
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>Rs. {subtotal}</span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Discount</span>
+                      <span>- Rs. {discountAmount}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
                     <span>Rs. {total}</span>

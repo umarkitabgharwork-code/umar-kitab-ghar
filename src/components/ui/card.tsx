@@ -8,11 +8,11 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "shadow-sm hover:shadow-md",
-        elevated: "shadow-md hover:shadow-lg hover:-translate-y-1",
-        interactive: "shadow-md hover:shadow-xl hover:-translate-y-2 cursor-pointer",
+        default: "shadow-sm hover:shadow-md hover:border-accent/50",
+        elevated: "shadow-md hover:shadow-lg hover:-translate-y-1 hover:border-accent/60",
+        interactive: "shadow-md hover:shadow-xl hover:-translate-y-2 cursor-pointer hover:border-accent/70",
         flat: "border-0 shadow-none",
-        outline: "bg-transparent border-2 border-primary/20 hover:border-primary/40",
+        outline: "bg-transparent border-2 border-accent/30 hover:border-accent/60",
       },
     },
     defaultVariants: {

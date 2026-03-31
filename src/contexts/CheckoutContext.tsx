@@ -19,12 +19,20 @@ export interface CheckoutFormData {
   longitude?: number;
 }
 
+export interface AppliedCoupon {
+  couponId: string;
+  code: string;
+  discountAmount: number;
+}
+
 export interface CheckoutState {
   formData: CheckoutFormData;
   deliveryMethod: DeliveryMethod | null;
   selectedBranch: Branch | null;
   paymentMethod: PaymentMethod | null;
   paymentCompleted: boolean;
+  appliedCoupon: AppliedCoupon | null;
+  paymentScreenshotUrl: string | null;
 }
 
 interface CheckoutContextType {
@@ -34,6 +42,8 @@ interface CheckoutContextType {
   setSelectedBranch: (branch: Branch) => void;
   setPaymentMethod: (method: PaymentMethod) => void;
   setPaymentCompleted: (completed: boolean) => void;
+  setAppliedCoupon: (coupon: AppliedCoupon | null) => void;
+  setPaymentScreenshotUrl: (url: string | null) => void;
   clearCheckout: () => void;
 }
 
@@ -48,6 +58,8 @@ const initialCheckoutState: CheckoutState = {
   selectedBranch: null,
   paymentMethod: null,
   paymentCompleted: false,
+  appliedCoupon: null,
+  paymentScreenshotUrl: null,
 };
 
 const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined);
@@ -82,6 +94,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
       ...prev,
       paymentMethod: method,
       paymentCompleted: method !== "online" ? true : false,
+      paymentScreenshotUrl: method !== "online" ? null : prev.paymentScreenshotUrl,
     }));
   };
 
@@ -89,6 +102,20 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
     setCheckoutState((prev) => ({
       ...prev,
       paymentCompleted: completed,
+    }));
+  };
+
+  const setAppliedCoupon = (coupon: AppliedCoupon | null) => {
+    setCheckoutState((prev) => ({
+      ...prev,
+      appliedCoupon: coupon,
+    }));
+  };
+
+  const setPaymentScreenshotUrl = (url: string | null) => {
+    setCheckoutState((prev) => ({
+      ...prev,
+      paymentScreenshotUrl: url,
     }));
   };
 
@@ -105,6 +132,8 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         setSelectedBranch,
         setPaymentMethod,
         setPaymentCompleted,
+        setAppliedCoupon,
+        setPaymentScreenshotUrl,
         clearCheckout,
       }}
     >
