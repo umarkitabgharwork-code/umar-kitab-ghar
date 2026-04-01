@@ -61,7 +61,9 @@ export async function createOrder(params: {
 
   const orderCode = "UKG-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-  const bookIds = params.cartItems.map((item) => item.id);
+  const bookIds = params.cartItems
+    .filter((item) => item.type !== "course")
+    .map((item) => item.id);
 
   const { data: stockRows, error: stockError } = await supabase
     .from("books")
@@ -74,11 +76,16 @@ export async function createOrder(params: {
   }
 
   const hasInsufficientStockOrInactive = params.cartItems.some((item) => {
+    // 🚀 SKIP COURSES
+    if (item.type === "course") return false;
+
     const row = stockRows?.find((r) => r.id === item.id) as
       | { id: string; stock: number | null; is_active: boolean | null }
       | undefined;
+
     const isActive = row?.is_active ?? false;
     const currentStock = row?.stock ?? 0;
+
     return !isActive || currentStock < item.quantity;
   });
 
@@ -139,7 +146,8 @@ export async function createOrder(params: {
   // ✅ INSERT ORDER ITEMS
   const orderItemsPayload = params.cartItems.map((item) => ({
     order_id: orderId,
-    book_id: item.id, // must be UUID
+    book_id: item.type === "book" ? item.id : null,
+    course_id: item.type === "course" ? item.id : null,
     quantity: item.quantity,
     price_at_time: item.price,
   }));
@@ -174,6 +182,9 @@ export async function createOrder(params: {
   } else if (latestStockRows) {
     await Promise.all(
       params.cartItems.map(async (item) => {
+        // 🚀 SKIP STOCK REDUCTION FOR COURSES
+        if (item.type === "course") return;
+
         const row = latestStockRows.find((r) => r.id === item.id) as { id: string; stock: number | null } | undefined;
         const currentStock = row?.stock ?? 0;
         let newStock = currentStock - item.quantity;
