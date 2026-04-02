@@ -110,7 +110,7 @@ export function Footer() {
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} Umar Kitab Ghar. All rights reserved.
           </p>
-          <p className="text-sm text-gray-400">Made by Huzaifa Sheikh</p>
+          <p className="text-sm text-gray-400">Made by Huzaifa Sheikh X Aina</p>
         </div>
       </div>
     </footer>

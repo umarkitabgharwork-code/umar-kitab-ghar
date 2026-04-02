@@ -22,6 +22,10 @@ export interface CartItem {
   courseType?: "new" | "old";
   books?: CourseBookItem[];
   pricePerCourse?: number;
+  /** Customer note for flexible course orders */
+  courseNote?: string;
+  /** Public URL of uploaded book list (image/PDF) in storage */
+  courseBookListUrl?: string | null;
 }
 
 interface CartContextType {

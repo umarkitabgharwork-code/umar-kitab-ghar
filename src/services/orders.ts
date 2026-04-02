@@ -65,23 +65,26 @@ export async function createOrder(params: {
     .filter((item) => item.type !== "course")
     .map((item) => item.id);
 
-  const { data: stockRows, error: stockError } = await supabase
-    .from("books")
-    .select("id, stock, is_active")
-    .in("id", bookIds);
+  type StockRow = { id: string; stock: number | null; is_active: boolean | null };
+  let stockRows: StockRow[] = [];
+  if (bookIds.length > 0) {
+    const { data, error: stockError } = await supabase
+      .from("books")
+      .select("id, stock, is_active")
+      .in("id", bookIds);
 
-  if (stockError) {
-    console.error("Stock validation error:", stockError);
-    throw new Error("Failed to validate stock");
+    if (stockError) {
+      console.error("Stock validation error:", stockError);
+      throw new Error("Failed to validate stock");
+    }
+    stockRows = (data ?? []) as StockRow[];
   }
 
   const hasInsufficientStockOrInactive = params.cartItems.some((item) => {
     // 🚀 SKIP COURSES
     if (item.type === "course") return false;
 
-    const row = stockRows?.find((r) => r.id === item.id) as
-      | { id: string; stock: number | null; is_active: boolean | null }
-      | undefined;
+    const row = stockRows.find((r) => r.id === item.id) as StockRow | undefined;
 
     const isActive = row?.is_active ?? false;
     const currentStock = row?.stock ?? 0;
@@ -97,6 +100,17 @@ export async function createOrder(params: {
     params.formData.latitude && params.formData.longitude
       ? `https://www.google.com/maps?q=${params.formData.latitude},${params.formData.longitude}`
       : null;
+
+  const firstCourse = params.cartItems.find((i) => i.type === "course");
+  const courseOrderFields =
+    firstCourse != null
+      ? {
+          school_name: firstCourse.schoolName?.trim() || null,
+          class_name: firstCourse.className?.trim() || null,
+          note: firstCourse.courseNote?.trim() || null,
+          file_url: firstCourse.courseBookListUrl?.trim() || null,
+        }
+      : {};
 
   const orderPayload = {
     order_code: orderCode,
@@ -124,6 +138,7 @@ export async function createOrder(params: {
     total_amount: params.total,
     status: "pending",
     coupon_id: params.couponId || null,
+    ...courseOrderFields,
   };
 
   console.log("[createOrder] Inserting order with payload:", orderPayload);
@@ -172,6 +187,10 @@ export async function createOrder(params: {
   }
 
   // ===== REDUCE STOCK AFTER SUCCESSFUL ORDER =====
+  if (bookIds.length === 0) {
+    return orderCode;
+  }
+
   const { data: latestStockRows, error: latestStockError } = await supabase
     .from("books")
     .select("id, stock")

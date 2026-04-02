@@ -66,8 +66,9 @@ const PaymentPage = () => {
         }
       }
 
+      const showCourseFollowUp = items.some((i) => i.type === "course");
       clearCart();
-      navigate(ROUTES.ORDER_SUCCESS, { state: { orderCode } });
+      navigate(ROUTES.ORDER_SUCCESS, { state: { orderCode, showCourseFollowUp } });
     } catch (error) {
       console.error("Failed to place order:", error);
       const message =

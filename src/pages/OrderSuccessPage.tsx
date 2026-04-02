@@ -11,7 +11,9 @@ const OrderSuccessPage = () => {
   const { checkoutState, clearCheckout } = useCheckout();
   const navigate = useNavigate();
   const location = useLocation();
-  const orderCode = (location.state as { orderCode?: string } | null)?.orderCode;
+  const locationState = location.state as { orderCode?: string; showCourseFollowUp?: boolean } | null;
+  const orderCode = locationState?.orderCode;
+  const showCourseFollowUp = Boolean(locationState?.showCourseFollowUp);
 
   // Redirect to home if no checkout data and no order ID (e.g. direct URL access)
   useEffect(() => {
@@ -132,6 +134,12 @@ const OrderSuccessPage = () => {
               <Separator />
 
               <div className="space-y-4">
+                {showCourseFollowUp && (
+                  <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                    Order place hone ke baad aapko confirmation call aayegi jisme aapki poori requirement aur price
+                    confirm kiya jayega.
+                  </p>
+                )}
                 <p className="text-sm text-muted-foreground">
                   We will process your order and contact you soon. You will receive a confirmation email shortly.
                 </p>
