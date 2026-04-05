@@ -1571,6 +1571,10 @@ export type AdminOrder = {
   google_maps_url: string | null;
   delivery_method?: string | null;
   payment_method?: string | null;
+  school_name?: string | null;
+  class_name?: string | null;
+  note?: string | null;
+  file_url?: string | null;
 };
 
 export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
@@ -1580,7 +1584,7 @@ export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, order_code, customer_name, phone, total_amount, status, created_at, branch, address, google_maps_url, delivery_method, payment_method"
+      "id, order_code, customer_name, phone, total_amount, status, created_at, branch, address, google_maps_url, delivery_method, payment_method, school_name, class_name, note, file_url"
     )
     .order("created_at", { ascending: false });
 
@@ -1599,6 +1603,10 @@ export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
     google_maps_url?: string | null;
     delivery_method?: string | null;
     payment_method?: string | null;
+    school_name?: string | null;
+    class_name?: string | null;
+    note?: string | null;
+    file_url?: string | null;
   };
 
   const mapped: AdminOrder[] = (data ?? []).map((row) => {
@@ -1616,10 +1624,116 @@ export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
       google_maps_url: r.google_maps_url ?? null,
       delivery_method: r.delivery_method ?? null,
       payment_method: r.payment_method ?? null,
+      school_name: r.school_name ?? null,
+      class_name: r.class_name ?? null,
+      note: r.note ?? null,
+      file_url: r.file_url ?? null,
     };
   });
 
   return { data: mapped, success: true };
+}
+
+export type AdminOrderDetail = {
+  order: AdminOrder;
+  items: AdminOrderItem[];
+};
+
+/**
+ * Single order with nested line items (Supabase: orders + order_items + book title when linked).
+ */
+export async function adminGetOrderDetail(orderId: string): Promise<ApiResponse<AdminOrderDetail>> {
+  const auth = await requireAdmin();
+  if (!auth.success) {
+    return { data: { order: {} as AdminOrder, items: [] }, success: false, message: auth.message };
+  }
+  if (!orderId) {
+    return { data: { order: {} as AdminOrder, items: [] }, success: false, message: "Missing order id" };
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*, order_items(*, books(title))")
+    .eq("id", orderId)
+    .single();
+
+  if (error || !data) {
+    return {
+      data: { order: {} as AdminOrder, items: [] },
+      success: false,
+      message: error?.message || "Order not found",
+    };
+  }
+
+  type OrderItemNested = {
+    quantity?: number | null;
+    price_at_time?: number | null;
+    course_id?: string | null;
+    books:
+      | { title: string | null }
+      | { title: string | null }[]
+      | null;
+  };
+
+  const raw = data as Record<string, unknown> & { order_items?: OrderItemNested[] | null };
+  const nestedItems = raw.order_items ?? [];
+
+  const {
+    order_items: _omit,
+    id,
+    order_code,
+    customer_name,
+    phone,
+    total_amount,
+    status,
+    created_at,
+    branch,
+    address,
+    google_maps_url,
+    delivery_method,
+    payment_method,
+    school_name,
+    class_name,
+    note,
+    file_url,
+  } = raw;
+
+  const order: AdminOrder = {
+    id: String(id ?? ""),
+    order_code: (order_code as string | null) ?? "",
+    customer_name: (customer_name as string | null) ?? "",
+    phone: (phone as string | null) ?? "",
+    total_amount: Number(total_amount ?? 0),
+    status: (status as string | null) ?? "",
+    created_at: (created_at as string) ?? "",
+    branch: (branch as string | null) ?? null,
+    address: (address as string | null) ?? null,
+    google_maps_url: (google_maps_url as string | null) ?? null,
+    delivery_method: (delivery_method as string | null) ?? null,
+    payment_method: (payment_method as string | null) ?? null,
+    school_name: (school_name as string | null) ?? null,
+    class_name: (class_name as string | null) ?? null,
+    note: (note as string | null) ?? null,
+    file_url: (file_url as string | null) ?? null,
+  };
+
+  const items: AdminOrderItem[] = nestedItems.map((it) => {
+    const rawBooks = it.books;
+    const normalizedBooks: AdminOrderItem["books"] = Array.isArray(rawBooks)
+      ? rawBooks.map((b) => ({ title: b.title ?? "Product" }))
+      : rawBooks
+        ? { title: rawBooks.title ?? "Product" }
+        : null;
+
+    return {
+      quantity: Number(it.quantity ?? 0),
+      price_at_time: Number(it.price_at_time ?? 0),
+      books: normalizedBooks,
+      course_id: it.course_id ?? null,
+    };
+  });
+
+  return { data: { order, items }, success: true };
 }
 
 export async function adminUpdateOrderStatus(
@@ -1650,6 +1764,7 @@ export type AdminOrderItem = {
         title: string;
       }[]
     | null;
+  course_id?: string | null;
 };
 
 export async function adminGetOrderItems(orderId: string): Promise<ApiResponse<AdminOrderItem[]>> {
@@ -1659,7 +1774,7 @@ export async function adminGetOrderItems(orderId: string): Promise<ApiResponse<A
 
   const { data, error } = await supabase
     .from("order_items")
-    .select("quantity, price_at_time, books(title)")
+    .select("quantity, price_at_time, course_id, books(title)")
     .eq("order_id", orderId);
 
   if (error) return { data: [], success: false, message: error.message };
@@ -1667,6 +1782,7 @@ export async function adminGetOrderItems(orderId: string): Promise<ApiResponse<A
   type AdminOrderItemRow = {
     quantity?: number | null;
     price_at_time?: number | null;
+    course_id?: string | null;
     books:
       | { title: string | null }
       | { title: string | null }[]
@@ -1686,6 +1802,7 @@ export async function adminGetOrderItems(orderId: string): Promise<ApiResponse<A
       quantity: Number(r.quantity ?? 0),
       price_at_time: Number(r.price_at_time ?? 0),
       books: normalizedBooks,
+      course_id: r.course_id ?? null,
     };
   });
 

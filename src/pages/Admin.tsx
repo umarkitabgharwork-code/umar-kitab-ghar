@@ -7,7 +7,7 @@ import {
   adminCreateBlogPost,
   adminGetBooks,
   adminGetCategories,
-  adminGetOrderItems,
+  adminGetOrderDetail,
   adminGetOrders,
   adminSetBookActive,
   adminUpdateBook,
@@ -25,6 +25,17 @@ import {
 } from "@/services/api";
 import { supabase } from "@/lib/supabase";
 import CourseManager from "../components/CourseManager";
+
+function isCourseOrder(order: AdminOrder | null): boolean {
+  return order != null && order.school_name != null && String(order.school_name).trim() !== "";
+}
+
+function orderItemDisplayTitle(item: AdminOrderItem): string {
+  const t = Array.isArray(item.books) ? item.books[0]?.title : item.books?.title;
+  if (t) return t;
+  if (item.course_id) return "Course order";
+  return "—";
+}
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -570,19 +581,19 @@ export default function Admin() {
   const openOrderDetails = async (order: AdminOrder) => {
     setSelectedOrder(order);
     setLoadingItems(true);
-    const res = await adminGetOrderItems(order.id);
+    const res = await adminGetOrderDetail(order.id);
+    setLoadingItems(false);
     if (!res.success) {
-      console.error("Failed to load order items:", res.message);
+      console.error("Failed to load order details:", res.message);
       toast({
         variant: "destructive",
-        description: "Failed to load order items.",
+        description: "Failed to load order details.",
       });
       setOrderItems([]);
-      setLoadingItems(false);
       return;
     }
-    setOrderItems(res.data || []);
-    setLoadingItems(false);
+    setSelectedOrder(res.data.order);
+    setOrderItems(res.data.items);
   };
 
   const handlePrintInvoice = () => {
@@ -1895,6 +1906,43 @@ export default function Admin() {
               <p><strong>Payment Method:</strong> {selectedOrder.payment_method || "-"}</p>
             </section>
 
+            {isCourseOrder(selectedOrder) && (
+              <section style={sectionStyle}>
+                <h3>Course Details</h3>
+                <p>
+                  <strong>School:</strong> {selectedOrder.school_name}
+                </p>
+                <p>
+                  <strong>Class:</strong> {selectedOrder.class_name ?? "-"}
+                </p>
+                <p>
+                  <strong>Instructions:</strong>{" "}
+                  {selectedOrder.note?.trim() ? selectedOrder.note : "No instructions provided"}
+                </p>
+                {selectedOrder.file_url ? (
+                  <p style={{ marginTop: 8 }}>
+                    <a
+                      href={selectedOrder.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: "inline-block",
+                        padding: "8px 14px",
+                        background: "hsl(var(--primary))",
+                        color: "hsl(var(--primary-foreground))",
+                        borderRadius: 6,
+                        textDecoration: "none",
+                        fontWeight: 600,
+                        fontSize: 14,
+                      }}
+                    >
+                      View Uploaded List
+                    </a>
+                  </p>
+                ) : null}
+              </section>
+            )}
+
             {/* Items */}
             <section style={sectionStyle}>
               <h3>Ordered Items</h3>
@@ -1913,11 +1961,7 @@ export default function Admin() {
                   <tbody>
                     {orderItems.map((item, index) => (
                       <tr key={index}>
-                        <td>
-                          {Array.isArray(item.books)
-                            ? item.books[0]?.title
-                            : item.books?.title}
-                        </td>
+                        <td>{orderItemDisplayTitle(item)}</td>
                         <td>{item.quantity}</td>
                         <td>{item.price_at_time}</td>
                         <td>{item.quantity * item.price_at_time}</td>
@@ -1954,6 +1998,25 @@ export default function Admin() {
                 )}
                 <div><strong>Delivery Method:</strong> {selectedOrder.delivery_method || "-"}</div>
                 <div><strong>Payment Method:</strong> {selectedOrder.payment_method || "-"}</div>
+                {isCourseOrder(selectedOrder) && (
+                  <>
+                    <div>
+                      <strong>School:</strong> {selectedOrder.school_name}
+                    </div>
+                    <div>
+                      <strong>Class:</strong> {selectedOrder.class_name ?? "-"}
+                    </div>
+                    <div>
+                      <strong>Instructions:</strong>{" "}
+                      {selectedOrder.note?.trim() ? selectedOrder.note : "No instructions provided"}
+                    </div>
+                    {selectedOrder.file_url ? (
+                      <div>
+                        <strong>Book list:</strong> {selectedOrder.file_url}
+                      </div>
+                    ) : null}
+                  </>
+                )}
               </div>
 
               <hr />
@@ -1970,11 +2033,7 @@ export default function Admin() {
                 <tbody>
                   {orderItems.map((item, index) => (
                     <tr key={`inv-${index}`}>
-                      <td>
-                        {Array.isArray(item.books)
-                          ? item.books[0]?.title
-                          : item.books?.title}
-                      </td>
+                      <td>{orderItemDisplayTitle(item)}</td>
                       <td>{item.quantity}</td>
                       <td>{item.quantity * item.price_at_time}</td>
                     </tr>

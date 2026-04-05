@@ -254,13 +254,13 @@ const HomePage = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight">
               {currentBanner?.title ?? (
                 <>
-                  Your Trusted Partner for <span className="text-accent">School Books</span> & Stationery
+                   <span className="text-accent"></span> 
                 </>
               )}
             </h1>
             <p className="text-lg md:text-xl text-primary-foreground/90">
               {currentBanner?.subtitle ??
-                "Find complete school courses, individual books, and quality stationery all in one place. From Nursery to Class 10, we have everything your child needs for academic success."}
+                ""}
             </p>
 
             <div className="flex flex-wrap gap-4 pt-4">
