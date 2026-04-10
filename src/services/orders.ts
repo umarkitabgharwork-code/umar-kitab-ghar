@@ -231,6 +231,32 @@ export async function createOrder(params: {
     );
   }
 
+  // 🔥 SEND DATA TO WEBHOOK (n8n)
+try {
+  await fetch("https://unscrawling-marquetta-scorningly.ngrok-free.dev/webhook/48b840df-da8e-491b-8f4e-87ec056dac5b", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      order_code: orderCode,
+      customer_name: params.formData.name,
+      phone: params.formData.primaryPhone,
+      delivery_method: params.deliveryMethod,
+      payment_method: params.paymentMethod,
+      total_amount: params.total,
+
+      school_name: params.cartItems.find(i => i.type === "course")?.schoolName || null,
+      class_name: params.cartItems.find(i => i.type === "course")?.className || null,
+      note: params.cartItems.find(i => i.type === "course")?.courseNote || null,
+      file_url: params.cartItems.find(i => i.type === "course")?.courseBookListUrl || null,
+
+      created_at: new Date().toISOString()
+    }),
+  });
+} catch (err) {
+  console.error("Webhook failed:", err);
+}
   return orderCode;
 }
 

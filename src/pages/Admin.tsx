@@ -1007,6 +1007,8 @@ export default function Admin() {
     ? getCategoryTypeForBook(selectedBookForMeta.category_id)
     : "other";
 
+  console.log("[ADMIN ORDER]", selectedOrder);
+
   return (
     <div className="max-w-7xl mx-auto px-4 space-y-8 py-8">
       <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -1884,21 +1886,24 @@ export default function Admin() {
               )}
             </section>
 
-            {(selectedOrder.address || selectedOrder.google_maps_url) && (
-              <section style={sectionStyle}>
-                <h3>Location Info</h3>
-                {selectedOrder.address && (
-                  <p><strong>Address:</strong> {selectedOrder.address}</p>
-                )}
-                {selectedOrder.google_maps_url && (
-                  <p>
-                    <a href={selectedOrder.google_maps_url} target="_blank" rel="noreferrer">
-                      Open in Google Maps
-                    </a>
-                  </p>
-                )}
-              </section>
-            )}
+            <div style={sectionStyle}>
+              <h3>Location Info</h3>
+
+              {selectedOrder.address && (
+                <p>Address: {selectedOrder.address}</p>
+              )}
+
+              {selectedOrder.google_maps_url && (
+                <a
+                  href={selectedOrder.google_maps_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: "#4ea8ff", textDecoration: "underline" }}
+                >
+                  Open in Google Maps
+                </a>
+              )}
+            </div>
 
             {/* Payment */}
             <section style={sectionStyle}>
