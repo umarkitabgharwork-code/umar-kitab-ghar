@@ -79,6 +79,9 @@ export interface CartItem {
   quantity: number;
   category?: string;
   image?: string;
+  type?: "book" | "course" | "custom";
+  customFileUrl?: string | null;
+  customNote?: string;
 }
 
 // API response types

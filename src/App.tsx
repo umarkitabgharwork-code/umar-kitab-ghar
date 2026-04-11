@@ -12,6 +12,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import HomePage from "./pages/HomePage";
 import DealsPage from "./pages/DealsPage";
 import BuyCoursePage from "./pages/BuyCoursePage";
+import UploadListPage from "./pages/UploadListPage";
 import StationeryPage from "./pages/StationeryPage";
 import Blog from "./pages/Blog";
 import BlogDetails from "./pages/BlogDetails";
@@ -77,6 +78,7 @@ const App = () => (
                     element={<DealsPage />}
                   />
                   <Route path="/buy-course" element={<BuyCoursePage />} />
+                  <Route path="/upload-list" element={<UploadListPage />} />
                   <Route path="/product/:id" element={<ProductDetailPage />} />
                   <Route path="/trending" element={<TrendingPage />} />
                   <Route path="/best-sellers" element={<BestSellersPage />} />

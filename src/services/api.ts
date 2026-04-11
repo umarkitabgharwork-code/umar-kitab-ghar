@@ -1575,6 +1575,7 @@ export type AdminOrder = {
   class_name?: string | null;
   note?: string | null;
   file_url?: string | null;
+  order_type?: string | null;
 };
 
 export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
@@ -1584,7 +1585,7 @@ export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, order_code, customer_name, phone, total_amount, status, created_at, branch, address, google_maps_url, delivery_method, payment_method, school_name, class_name, note, file_url"
+      "id, order_code, customer_name, phone, total_amount, status, created_at, branch, address, google_maps_url, delivery_method, payment_method, school_name, class_name, note, file_url, order_type"
     )
     .order("created_at", { ascending: false });
 
@@ -1607,6 +1608,7 @@ export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
     class_name?: string | null;
     note?: string | null;
     file_url?: string | null;
+    order_type?: string | null;
   };
 
   const mapped: AdminOrder[] = (data ?? []).map((row) => {
@@ -1628,6 +1630,7 @@ export async function adminGetOrders(): Promise<ApiResponse<AdminOrder[]>> {
       class_name: r.class_name ?? null,
       note: r.note ?? null,
       file_url: r.file_url ?? null,
+      order_type: r.order_type ?? null,
     };
   });
 
@@ -1696,6 +1699,7 @@ export async function adminGetOrderDetail(orderId: string): Promise<ApiResponse<
     class_name,
     note,
     file_url,
+    order_type,
   } = raw;
 
   const order: AdminOrder = {
@@ -1715,6 +1719,7 @@ export async function adminGetOrderDetail(orderId: string): Promise<ApiResponse<
     class_name: (class_name as string | null) ?? null,
     note: (note as string | null) ?? null,
     file_url: (file_url as string | null) ?? null,
+    order_type: (order_type as string | null) ?? null,
   };
 
   const items: AdminOrderItem[] = nestedItems.map((it) => {

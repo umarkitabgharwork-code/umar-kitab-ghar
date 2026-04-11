@@ -36,6 +36,7 @@ const CheckoutPage = () => {
   const total = Math.max(0, subtotal - discountAmount);
 
   const courseItem = items.find((item) => item.type === "course");
+  const customItem = items.find((item) => item.type === "custom");
 
   // Validate cart items against latest stock on cart page load
   useEffect(() => {
@@ -449,6 +450,27 @@ const CheckoutPage = () => {
                         <span>Rs. {courseItem.price * courseItem.quantity}</span>
                       </div>
 
+                      {customItem && (
+                        <div className="border-t pt-3 space-y-2">
+                          <div className="font-medium">Custom Order</div>
+                          {customItem.customNote?.trim() ? (
+                            <p className="text-muted-foreground text-xs">{customItem.customNote}</p>
+                          ) : null}
+                          <p className="text-sm text-muted-foreground">
+                            Price will be confirmed via call or WhatsApp
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="px-0 h-auto text-xs text-destructive"
+                            onClick={() => removeItem(customItem.id)}
+                          >
+                            Remove Custom Order
+                          </Button>
+                        </div>
+                      )}
+
                       <Button
                         type="button"
                         variant="ghost"
@@ -460,30 +482,51 @@ const CheckoutPage = () => {
                       </Button>
                     </div>
                   ) : (
-                    items.map((item) => (
-                      <div key={item.id} className="space-y-1 text-sm">
-                        <div className="flex justify-between gap-2">
-                          <div className="flex-1">
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-muted-foreground">
-                              Rs. {item.price} × {item.quantity}
+                    items.map((item) =>
+                      item.type === "custom" ? (
+                        <div key={item.id} className="space-y-1 text-sm">
+                          <div className="font-medium">Custom Order</div>
+                          {item.customNote?.trim() ? (
+                            <p className="text-muted-foreground text-xs">{item.customNote}</p>
+                          ) : null}
+                          <p className="text-sm text-muted-foreground">
+                            Price will be confirmed via call or WhatsApp
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="px-0 h-auto text-xs text-destructive"
+                            onClick={() => removeItem(item.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ) : (
+                        <div key={item.id} className="space-y-1 text-sm">
+                          <div className="flex justify-between gap-2">
+                            <div className="flex-1">
+                              <div className="font-medium">{item.name}</div>
+                              <div className="text-muted-foreground">
+                                Rs. {item.price} × {item.quantity}
+                              </div>
+                            </div>
+                            <div className="font-semibold">
+                              Rs. {item.price * item.quantity}
                             </div>
                           </div>
-                          <div className="font-semibold">
-                            Rs. {item.price * item.quantity}
-                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="px-0 h-auto text-xs text-destructive"
+                            onClick={() => removeItem(item.id)}
+                          >
+                            Remove
+                          </Button>
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="px-0 h-auto text-xs text-destructive"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))
+                      )
+                    )
                   )}
                 </div>
 

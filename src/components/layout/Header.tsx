@@ -146,7 +146,7 @@ export function Header() {
     setOpenMobileDropdowns(newSet);
   };
 
-  const NAV_LABELS = ["Home", "Deals", "Course", "Book", "Other Items", "Track Order"] as const;
+  const NAV_LABELS = ["Home", "Deals", "Course", "Upload List", "Book", "Other Items", "Track Order"] as const;
   const navItems = NAV_MENU_ITEMS.filter(
     (item) => NAV_LABELS.includes(item.label as (typeof NAV_LABELS)[number])
   );

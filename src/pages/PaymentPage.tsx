@@ -389,19 +389,31 @@ const PaymentPage = () => {
               <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold">Order Summary</h3>
                 <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <div className="flex-1">
-                        <div className="font-medium">{item.name}</div>
+                  {items.map((item) =>
+                    item.type === "custom" ? (
+                      <div key={item.id} className="text-sm space-y-1">
+                        <div className="font-medium">Custom Order</div>
+                        {item.customNote?.trim() ? (
+                          <div className="text-muted-foreground text-xs">{item.customNote}</div>
+                        ) : null}
                         <div className="text-muted-foreground">
-                          Rs. {item.price} × {item.quantity}
+                          Price will be confirmed via call or WhatsApp
                         </div>
                       </div>
-                      <div className="font-semibold">
-                        Rs. {item.price * item.quantity}
+                    ) : (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <div className="flex-1">
+                          <div className="font-medium">{item.name}</div>
+                          <div className="text-muted-foreground">
+                            Rs. {item.price} × {item.quantity}
+                          </div>
+                        </div>
+                        <div className="font-semibold">
+                          Rs. {item.price * item.quantity}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between text-sm">

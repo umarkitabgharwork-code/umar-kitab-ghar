@@ -30,10 +30,15 @@ function isCourseOrder(order: AdminOrder | null): boolean {
   return order != null && order.school_name != null && String(order.school_name).trim() !== "";
 }
 
+function isCustomOrder(order: AdminOrder | null): boolean {
+  return order != null && order.order_type === "custom";
+}
+
 function orderItemDisplayTitle(item: AdminOrderItem): string {
   const t = Array.isArray(item.books) ? item.books[0]?.title : item.books?.title;
   if (t) return t;
   if (item.course_id) return "Course order";
+  if (item.price_at_time === 0 && !item.course_id) return "Custom Order";
   return "—";
 }
 
@@ -1948,6 +1953,37 @@ export default function Admin() {
               </section>
             )}
 
+            {isCustomOrder(selectedOrder) && (
+              <section style={sectionStyle}>
+                <h3>Custom Order Details</h3>
+                <p>
+                  <strong>Instructions:</strong>{" "}
+                  {selectedOrder.note?.trim() ? selectedOrder.note : "No instructions provided"}
+                </p>
+                {selectedOrder.file_url ? (
+                  <p style={{ marginTop: 8 }}>
+                    <a
+                      href={selectedOrder.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: "inline-block",
+                        padding: "8px 14px",
+                        background: "hsl(var(--primary))",
+                        color: "hsl(var(--primary-foreground))",
+                        borderRadius: 6,
+                        textDecoration: "none",
+                        fontWeight: 600,
+                        fontSize: 14,
+                      }}
+                    >
+                      View Uploaded List
+                    </a>
+                  </p>
+                ) : null}
+              </section>
+            )}
+
             {/* Items */}
             <section style={sectionStyle}>
               <h3>Ordered Items</h3>
@@ -2018,6 +2054,19 @@ export default function Admin() {
                     {selectedOrder.file_url ? (
                       <div>
                         <strong>Book list:</strong> {selectedOrder.file_url}
+                      </div>
+                    ) : null}
+                  </>
+                )}
+                {isCustomOrder(selectedOrder) && (
+                  <>
+                    <div>
+                      <strong>Custom order instructions:</strong>{" "}
+                      {selectedOrder.note?.trim() ? selectedOrder.note : "No instructions provided"}
+                    </div>
+                    {selectedOrder.file_url ? (
+                      <div>
+                        <strong>Uploaded list:</strong> {selectedOrder.file_url}
                       </div>
                     ) : null}
                   </>

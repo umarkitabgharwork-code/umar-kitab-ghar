@@ -16,7 +16,7 @@ export interface CartItem {
   quantity: number;
   category?: string;
   image?: string;
-  type?: "book" | "course";
+  type?: "book" | "course" | "custom";
   schoolName?: string;
   className?: string;
   courseType?: "new" | "old";
@@ -26,6 +26,10 @@ export interface CartItem {
   courseNote?: string;
   /** Public URL of uploaded book list (image/PDF) in storage */
   courseBookListUrl?: string | null;
+  /** Custom upload-list flow: public file URL */
+  customFileUrl?: string | null;
+  /** Custom upload-list flow: customer note */
+  customNote?: string;
 }
 
 interface CartContextType {

@@ -62,7 +62,7 @@ export async function createOrder(params: {
   const orderCode = "UKG-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
   const bookIds = params.cartItems
-    .filter((item) => item.type !== "course")
+    .filter((item) => item.type !== "course" && item.type !== "custom")
     .map((item) => item.id);
 
   type StockRow = { id: string; stock: number | null; is_active: boolean | null };
@@ -83,6 +83,7 @@ export async function createOrder(params: {
   const hasInsufficientStockOrInactive = params.cartItems.some((item) => {
     // 🚀 SKIP COURSES
     if (item.type === "course") return false;
+    if (item.type === "custom") return false;
 
     const row = stockRows.find((r) => r.id === item.id) as StockRow | undefined;
 
@@ -101,6 +102,7 @@ export async function createOrder(params: {
       ? `https://www.google.com/maps?q=${params.formData.latitude},${params.formData.longitude}`
       : null;
 
+  const customItem = params.cartItems.find((i) => i.type === "custom");
   const firstCourse = params.cartItems.find((i) => i.type === "course");
   const courseOrderFields =
     firstCourse != null
@@ -111,6 +113,14 @@ export async function createOrder(params: {
           file_url: firstCourse.courseBookListUrl?.trim() || null,
         }
       : {};
+
+  const customOrderFields = customItem
+    ? {
+        order_type: "custom" as const,
+        file_url: customItem.customFileUrl?.trim() || null,
+        note: customItem.customNote?.trim() || null,
+      }
+    : {};
 
   const orderPayload = {
     order_code: orderCode,
@@ -139,6 +149,7 @@ export async function createOrder(params: {
     status: "pending",
     coupon_id: params.couponId || null,
     ...courseOrderFields,
+    ...customOrderFields,
   };
 
   console.log("[createOrder] Inserting order with payload:", orderPayload);
@@ -203,6 +214,7 @@ export async function createOrder(params: {
       params.cartItems.map(async (item) => {
         // 🚀 SKIP STOCK REDUCTION FOR COURSES
         if (item.type === "course") return;
+        if (item.type === "custom") return;
 
         const row = latestStockRows.find((r) => r.id === item.id) as { id: string; stock: number | null } | undefined;
         const currentStock = row?.stock ?? 0;
@@ -246,10 +258,15 @@ try {
       payment_method: params.paymentMethod,
       total_amount: params.total,
 
-      school_name: params.cartItems.find(i => i.type === "course")?.schoolName || null,
-      class_name: params.cartItems.find(i => i.type === "course")?.className || null,
-      note: params.cartItems.find(i => i.type === "course")?.courseNote || null,
-      file_url: params.cartItems.find(i => i.type === "course")?.courseBookListUrl || null,
+      order_type: customItem ? "custom" : null,
+      school_name: params.cartItems.find((i) => i.type === "course")?.schoolName || null,
+      class_name: params.cartItems.find((i) => i.type === "course")?.className || null,
+      note:
+        (customItem?.customNote ?? params.cartItems.find((i) => i.type === "course")?.courseNote) || null,
+      file_url:
+        (customItem?.customFileUrl ??
+          params.cartItems.find((i) => i.type === "course")?.courseBookListUrl) ||
+        null,
 
       created_at: new Date().toISOString()
     }),

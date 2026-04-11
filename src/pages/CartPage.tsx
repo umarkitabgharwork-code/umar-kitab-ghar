@@ -45,28 +45,41 @@ export default function CartPage() {
                 <CardContent className="p-5 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{item.name}</div>
-                    <div className="text-sm text-muted-foreground">Rs. {item.price}</div>
+                    {item.type === "custom" ? (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Price will be confirmed via call or WhatsApp
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground">Rs. {item.price}</div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-8 text-center font-medium">{item.quantity}</span>
-                    <Button
-                      type="button"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                    {item.type === "custom" ? (
+                      <span className="w-8 text-center font-medium text-sm text-muted-foreground">×1</span>
+                    ) : (
+                      <>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center font-medium">{item.quantity}</span>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                     <Button
                       type="button"
                       variant="destructive"
@@ -108,4 +121,3 @@ export default function CartPage() {
     </div>
   );
 }
-

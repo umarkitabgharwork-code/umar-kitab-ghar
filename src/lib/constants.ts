@@ -32,6 +32,7 @@ export const ROUTES = {
   NEW_DEAL: "/new-deal",
   DEALS: "/deals",
   BUY_COURSE: "/buy-course",
+  UPLOAD_LIST: "/upload-list",
   STATIONERY: "/stationery",
   BLOG: "/blog",
   CHECKOUT: "/checkout",
@@ -55,6 +56,7 @@ export const NAV_MENU_ITEMS: NavMenuItem[] = [
   { label: "Home", href: ROUTES.HOME },
   { label: "Deals", href: ROUTES.DEALS },
   { label: "Course", href: ROUTES.BUY_COURSE },
+  { label: "Upload List", href: ROUTES.UPLOAD_LIST },
   {
     label: "Book",
   },
