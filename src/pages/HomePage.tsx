@@ -218,8 +218,6 @@ const HomePage = () => {
               }}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/20" />
-          <div className="absolute inset-0 hero-gradient opacity-60" />
         </div>
 
         {/* Controls */}
