@@ -24,7 +24,7 @@ type MetaRow = { id: string; name: string };
 type GenreRow = MetaRow & { type?: string | null };
 
 const filterSidebarControlClass =
-  "w-full mb-2 px-3 py-2 rounded-md bg-[#0a1f52] border border-blue-800 text-white text-sm placeholder:text-blue-200/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40";
+  "w-full mb-2 px-3 py-2 rounded-xl border border-border bg-card text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
 const CategoryPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -352,12 +352,12 @@ const CategoryPage = () => {
             placeholder="Language"
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="w-full mb-2 px-3 py-2 bg-[#071235] border border-blue-800 text-white rounded-md placeholder:text-blue-200/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="w-full mb-2 px-3 py-2 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </>
       ) : (
         <select
-          className="bg-[#0b1a4a] border border-white/20 text-white px-3 py-2 rounded-md w-full"
+          className="w-full px-3 py-2 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
         >
@@ -370,10 +370,10 @@ const CategoryPage = () => {
   );
 
   return (
-    <div className="py-8 md:py-12">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="page-section">
+      <div className="container max-w-7xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">{displayName}</h1>
+          <h1 className="page-heading mb-3">{displayName}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Browse our collection of {displayName.toLowerCase()}.
           </p>
@@ -392,14 +392,14 @@ const CategoryPage = () => {
         </div>
 
         <div className="flex flex-col xl:flex-row gap-6 xl:items-start">
-          <aside className="hidden xl:block w-full xl:w-1/4 shrink-0 bg-[#071235] p-4 rounded-lg border border-blue-800">
+          <aside className="hidden xl:block w-full xl:w-1/4 shrink-0 bg-card p-5 rounded-2xl border border-border shadow-soft">
             <div className="flex items-center justify-between gap-2 mb-3">
-              <h3 className="text-white font-semibold">Filters</h3>
+              <h3 className="text-primary font-semibold">Filters</h3>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="shrink-0 h-8 text-xs border-blue-700 text-white hover:bg-white/10 hover:text-white"
+                className="shrink-0 h-8 text-xs"
                 onClick={clearAllFilters}
               >
                 Clear Filters
@@ -411,44 +411,44 @@ const CategoryPage = () => {
           <div className="flex-1 min-w-0 space-y-6">
             <button
               onClick={() => setShowFilters(true)}
-              className="xl:hidden bg-yellow-400 text-black px-4 py-2 rounded-md font-semibold"
+              className="xl:hidden bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold shadow-soft"
             >
               Filters ⚙️
             </button>
 
             <div className="flex flex-wrap gap-2 mb-4">
               {selectedPublisher && (
-                <span className="bg-yellow-400 text-black px-2 py-1 rounded text-sm inline-flex items-center gap-2">
+                <span className="filter-chip">
                   Publisher: {selectedPublisherLabel}
                   <button onClick={() => setSelectedPublisher("")}>✕</button>
                 </span>
               )}
               {selectedGenre && (
-                <span className="bg-yellow-400 text-black px-2 py-1 rounded text-sm inline-flex items-center gap-2">
+                <span className="filter-chip">
                   Genre: {selectedGenreLabel}
                   <button onClick={() => setSelectedGenre("")}>✕</button>
                 </span>
               )}
               {selectedSubject && (
-                <span className="bg-yellow-400 text-black px-2 py-1 rounded text-sm inline-flex items-center gap-2">
+                <span className="filter-chip">
                   Subject: {selectedSubjectLabel}
                   <button onClick={() => setSelectedSubject("")}>✕</button>
                 </span>
               )}
               {selectedClass && (
-                <span className="bg-yellow-400 text-black px-2 py-1 rounded text-sm inline-flex items-center gap-2">
+                <span className="filter-chip">
                   Class: {selectedClassLabel}
                   <button onClick={() => setSelectedClass("")}>✕</button>
                 </span>
               )}
               {selectedLanguage && (
-                <span className="bg-yellow-400 text-black px-2 py-1 rounded text-sm inline-flex items-center gap-2">
+                <span className="filter-chip">
                   Language: {selectedLanguage}
                   <button onClick={() => setSelectedLanguage("")}>✕</button>
                 </span>
               )}
               {sortOrder && (
-                <span className="bg-yellow-400 text-black px-2 py-1 rounded text-sm inline-flex items-center gap-2">
+                <span className="filter-chip">
                   Sort: {sortOrder === "low" ? "Price Low to High" : "Price High to Low"}
                   <button onClick={() => setSortOrder("")}>✕</button>
                 </span>
@@ -495,7 +495,7 @@ const CategoryPage = () => {
                       !outOfStock && typeof stock === "number" && stock > 0 && stock < 5;
 
                     return (
-                      <Card key={product.id} variant="elevated" className="h-full flex flex-col">
+                      <Card key={product.id} variant="elevated" className="page-card h-full flex flex-col overflow-hidden">
                         <CardContent className="p-4 relative flex flex-col h-full">
                           <div className="absolute top-2 right-2 z-10">
                             <WishlistButton productId={product.id} />
@@ -526,7 +526,7 @@ const CategoryPage = () => {
                             </Link>
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex flex-col items-start">
-                                <span className="text-lg text-yellow-400 font-semibold">
+                                <span className="text-lg text-price">
                                   Rs. {product.price ?? 0}
                                 </span>
                                 {showLowStock && (
@@ -570,6 +570,7 @@ const CategoryPage = () => {
                                 <div className="flex items-center gap-2">
                                   <Button
                                     size="sm"
+                                    variant="hero"
                                     onClick={() => handleAddToCart(product)}
                                     disabled={outOfStock}
                                   >
@@ -646,10 +647,10 @@ const CategoryPage = () => {
 
         {showFilters && (
           <div className="fixed inset-0 z-50 bg-black/50 xl:hidden">
-            <div className="absolute left-0 top-0 h-full w-80 max-w-[90vw] bg-[#0b1a4a] p-4 overflow-y-auto border-r border-blue-800">
+            <div className="absolute left-0 top-0 h-full w-80 max-w-[90vw] bg-card p-5 overflow-y-auto border-r border-border shadow-soft-lg">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-white font-semibold">Filters</h2>
-                <button className="text-white text-lg" onClick={() => setShowFilters(false)}>
+                <h2 className="text-primary font-semibold">Filters</h2>
+                <button className="text-muted-foreground text-lg hover:text-primary" onClick={() => setShowFilters(false)}>
                   ✕
                 </button>
               </div>
@@ -658,7 +659,7 @@ const CategoryPage = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs border-blue-700 text-white hover:bg-white/10 hover:text-white"
+                  className="h-8 text-xs"
                   onClick={clearAllFilters}
                 >
                   Clear Filters

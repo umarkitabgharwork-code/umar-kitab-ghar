@@ -70,11 +70,11 @@ export default function UploadListPage() {
   };
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-lg">
-        <Card>
+        <Card className="page-card-ivory">
           <CardContent className="p-6 md:p-8 space-y-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-center">Upload Your Book List</h1>
+            <h1 className="page-heading text-center">Upload Your Book List</h1>
 
             <div className="space-y-2">
               <Label htmlFor="list-file">
@@ -83,7 +83,7 @@ export default function UploadListPage() {
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="list-file"
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30 px-4 py-8 text-sm text-muted-foreground transition-colors hover:bg-muted/50"
+                  className="upload-zone flex cursor-pointer items-center justify-center gap-2 px-4 py-10 text-sm text-muted-foreground"
                 >
                   {uploading ? (
                     <>
@@ -133,6 +133,7 @@ export default function UploadListPage() {
 
             <Button
               type="button"
+              variant="hero"
               className="w-full"
               size="lg"
               onClick={handleProceed}

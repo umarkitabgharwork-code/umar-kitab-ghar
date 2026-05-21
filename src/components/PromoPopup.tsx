@@ -15,7 +15,7 @@ export function PromoPopup() {
     <div className="fixed inset-0 z-40 flex items-center justify-center modal-blur">
       <div className="modal-bg max-w-lg w-full mx-4 p-8 relative animate-scale-in">
         <button
-          className="absolute top-3 right-3 rounded-full px-2 py-1 text-sm border border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+          className="absolute top-3 right-3 rounded-full px-2 py-1 text-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold"
           onClick={() => setOpen(false)}
           aria-label="Close promotion"
         >
@@ -47,7 +47,7 @@ export function PromoPopup() {
             Create Account
           </button>
           <button
-            className="border border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold px-5 py-2.5 rounded-lg flex-1"
+            className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-5 py-2.5 rounded-xl flex-1"
             onClick={() => setOpen(false)}
           >
             Skip

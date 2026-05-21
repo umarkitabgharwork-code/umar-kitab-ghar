@@ -122,14 +122,14 @@ const DealsPage = () => {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-secondary/20">
-      <div className="container">
+    <section className="page-section">
+      <div className="container max-w-7xl">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-2">
-              <Sparkles className="h-7 w-7 text-accent" />
-              New Deals
-            </h2>
+            <h1 className="page-heading mb-2 flex items-center gap-2">
+              <Sparkles className="h-7 w-7 text-[#C9A44C]" />
+              Deals & Offers
+            </h1>
             <p className="text-muted-foreground">Latest offers on selected books.</p>
           </div>
         </div>
@@ -158,7 +158,7 @@ const DealsPage = () => {
                 <Card
                   key={deal.id}
                   variant="interactive"
-                  className="overflow-hidden card-shadow-hover hover:border-accent/60 transition-colors"
+                  className="page-card overflow-hidden hover:-translate-y-0.5 transition-all"
                   role="button"
                   tabIndex={0}
                   onClick={() => goToProduct(deal.bookId)}
@@ -193,18 +193,19 @@ const DealsPage = () => {
                     <div className="flex items-center justify-between pt-1">
                       <div className="space-y-1">
                         {deal.isCustom ? (
-                          <p className="text-sm text-yellow-400 font-semibold">Rs. {deal.dealPrice}</p>
+                          <p className="text-sm text-price font-semibold">Rs. {deal.dealPrice}</p>
                         ) : (
                           <>
                             <p className="text-xs text-muted-foreground line-through">Rs. {deal.originalPrice}</p>
-                            <p className="text-sm text-yellow-400 font-semibold">Rs. {deal.dealPrice}</p>
+                            <p className="text-sm text-price font-semibold">Rs. {deal.dealPrice}</p>
                           </>
                         )}
                       </div>
 
                       <Button
                         size="sm"
-                        className="gold-gradient rounded-full px-4 py-1.5 text-xs"
+                        variant="hero"
+                        className="rounded-full"
                         disabled={!deal.bookId}
                         onClick={(e) => {
                           e.stopPropagation();

@@ -8,7 +8,7 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1rem",
+      padding: "1.25rem",
       screens: {
         sm: "640px",
         md: "768px",
@@ -27,6 +27,19 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        sage: {
+          DEFAULT: "hsl(var(--sage))",
+          soft: "hsl(var(--sage-soft))",
+        },
+        brand: {
+          cream: "#F8F3E7",
+          ivory: "#FBF7EF",
+          navy: "#071D36",
+          sage: "#5F7F64",
+          "sage-soft": "#DDE8D8",
+          gold: "#C9A44C",
+          "gold-warm": "#D8B45A",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -68,8 +81,15 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "1.5rem",
+      },
+      boxShadow: {
+        soft: "0 8px 24px -8px rgba(7, 29, 54, 0.08)",
+        "soft-lg": "0 16px 40px -12px rgba(7, 29, 54, 0.12)",
       },
       keyframes: {
         "accordion-down": {
@@ -80,7 +100,7 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
@@ -92,7 +112,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "float": "float 3s ease-in-out infinite",
+        float: "float 3s ease-in-out infinite",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
     },

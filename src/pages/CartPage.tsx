@@ -11,14 +11,14 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container max-w-2xl">
-          <Card>
+          <Card className="page-card-ivory">
             <CardContent className="p-8 text-center">
               <ShoppingCart className="h-10 w-10 mx-auto text-muted-foreground/60 mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
+              <h2 className="page-heading text-2xl mb-2">Your cart is empty</h2>
               <p className="text-muted-foreground mb-6">Add some items to your cart before checking out.</p>
-              <Button asChild variant="secondary">
+              <Button asChild variant="hero-outline">
                 <Link to={ROUTES.HOME}>Continue Shopping</Link>
               </Button>
             </CardContent>
@@ -29,11 +29,11 @@ export default function CartPage() {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold">Cart</h1>
-          <Button asChild variant="outline">
+          <h1 className="page-heading">Cart</h1>
+          <Button asChild variant="hero">
             <Link to={ROUTES.CHECKOUT}>Checkout</Link>
           </Button>
         </div>
@@ -41,7 +41,7 @@ export default function CartPage() {
         <div className="grid md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-4">
             {items.map((item) => (
-              <Card key={item.id}>
+              <Card key={item.id} className="page-card">
                 <CardContent className="p-5 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <div className="font-semibold truncate">{item.name}</div>
@@ -50,7 +50,7 @@ export default function CartPage() {
                         Price will be confirmed via call or WhatsApp
                       </div>
                     ) : (
-                      <div className="text-sm text-muted-foreground">Rs. {item.price}</div>
+                      <div className="text-sm text-price">Rs. {item.price}</div>
                     )}
                   </div>
 
@@ -96,21 +96,21 @@ export default function CartPage() {
           </div>
 
           <div className="md:col-span-1">
-            <Card className="sticky top-24">
+            <Card className="sticky top-24 page-card-ivory">
               <CardContent className="p-6 space-y-3">
-                <h2 className="text-lg font-semibold">Summary</h2>
+                <h2 className="text-lg font-semibold text-[#071D36]">Summary</h2>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Items</span>
                   <span>{items.length}</span>
                 </div>
-                <div className="flex justify-between text-lg font-semibold pt-2 border-t">
+                <div className="flex justify-between text-lg font-semibold pt-2 border-t border-[#E8DEC8]">
                   <span>Total</span>
-                  <span>Rs. {total}</span>
+                  <span className="text-price">Rs. {total}</span>
                 </div>
-                <Button asChild variant="secondary" className="w-full">
+                <Button asChild variant="hero-outline" className="w-full">
                   <Link to={ROUTES.HOME}>Continue Shopping</Link>
                 </Button>
-                <Button asChild className="w-full" size="lg">
+                <Button asChild variant="hero" className="w-full" size="lg">
                   <Link to={ROUTES.CHECKOUT}>Proceed to Checkout</Link>
                 </Button>
               </CardContent>

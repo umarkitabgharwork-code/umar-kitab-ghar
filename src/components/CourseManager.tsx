@@ -342,15 +342,15 @@ export default function CourseManager() {
     }
   };
 
-  const card = "rounded-lg border border-blue-800 bg-[#071235] p-4";
+  const card = "rounded-2xl border border-border bg-card p-4 shadow-soft";
   const input =
-    "w-full px-3 py-2 rounded-md bg-[#0b1a4a] border border-blue-800 text-white placeholder:text-blue-200/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40";
+    "w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
   const select =
-    "w-full px-3 py-2 rounded-md bg-[#0b1a4a] border border-blue-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40";
+    "w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
   const primaryBtn =
-    "px-4 py-2 rounded-md bg-[#FFD700] text-[#050B2D] font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed";
+    "px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed";
   const ghostBtn =
-    "px-3 py-2 rounded-md border border-blue-800 text-white hover:bg-white/5 disabled:opacity-60 disabled:cursor-not-allowed";
+    "px-3 py-2 rounded-xl border border-border text-foreground hover:bg-secondary/60 disabled:opacity-60 disabled:cursor-not-allowed";
 
   const resetForm = () => {
     setEditingCourseId(null);
@@ -475,7 +475,7 @@ export default function CourseManager() {
           <div className="mt-5">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="text-white font-semibold">
-                Books for Class: <span className="text-[#FFD700]">{selectedClass}</span>
+                Books for Class: <span className="text-accent font-semibold">{selectedClass}</span>
               </div>
               <button
                 type="button"
@@ -560,7 +560,7 @@ export default function CourseManager() {
         ) : courses.length === 0 ? (
           <div className="text-blue-200/80 mt-3">No courses found.</div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-blue-800 mt-3">
+          <div className="overflow-x-auto rounded-2xl border border-border mt-3">
             <table className="w-full text-sm">
               <thead className="bg-white/5 text-blue-100">
                 <tr>
@@ -570,7 +570,7 @@ export default function CourseManager() {
                   <th className="text-left font-semibold px-4 py-3">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-blue-800/60">
+              <tbody className="divide-y divide-border">
                 {courses.map((c) => (
                   <tr key={c.id}>
                     <td className="px-4 py-3 text-white">

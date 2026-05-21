@@ -66,9 +66,9 @@ const OrderSuccessPage = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-2xl">
-        <Card>
+        <Card className="page-card-ivory">
           <CardContent className="p-8">
             <div className="text-center space-y-6">
               <div className="flex justify-center">

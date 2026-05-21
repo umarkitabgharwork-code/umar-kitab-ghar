@@ -112,9 +112,9 @@ const TrackOrderPage = () => {
     order?.created_at ? new Date(order.created_at).toLocaleString() : null;
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-3xl">
-        <Card>
+        <Card className="page-card-ivory">
           <CardContent className="p-6 md:p-8 space-y-6">
             <div className="flex items-center justify-between gap-4">
               <div>

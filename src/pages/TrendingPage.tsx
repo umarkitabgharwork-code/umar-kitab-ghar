@@ -20,12 +20,12 @@ const TrendingPage = () => {
   const trendingBooks = trendingResponse ?? [];
 
   return (
-    <div className="py-8 md:py-12">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="page-section">
+      <div className="container max-w-7xl">
         <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-2">
-              <Flame className="h-7 w-7 text-accent" />
+            <h1 className="page-heading mb-2 flex items-center gap-2">
+              <Flame className="h-7 w-7 text-[#C9A44C]" />
               Trending Books
             </h1>
             <p className="text-muted-foreground">
@@ -55,7 +55,7 @@ const TrendingPage = () => {
               <Card
                 key={b.id}
                 variant="interactive"
-                className="overflow-hidden card-shadow-hover hover:border-accent/60 transition-colors"
+                className="page-card overflow-hidden hover:-translate-y-0.5 transition-all"
               >
                 {b.image_url ? (
                   <img
@@ -76,11 +76,12 @@ const TrendingPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between pt-1">
-                    <p className="text-sm text-yellow-400 font-semibold">Rs. {b.price}</p>
+                    <p className="text-sm text-price font-semibold">Rs. {b.price}</p>
                     <Button
                       asChild
                       size="sm"
-                      className="gold-gradient rounded-full px-4 py-1.5 text-xs"
+                      variant="hero"
+                      className="rounded-full"
                     >
                       <Link to={`/product/${b.id}`} state={{ from: location.pathname }}>View</Link>
                     </Button>

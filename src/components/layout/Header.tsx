@@ -8,7 +8,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, BookOpen, ShoppingCart, Search, ChevronDown, Heart } from "lucide-react";
+import {
+  Menu,
+  X,
+  BookOpen,
+  ShoppingCart,
+  Search,
+  ChevronDown,
+  Heart,
+  Truck,
+  MapPin,
+  LayoutGrid,
+  User,
+} from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { NAV_MENU_ITEMS, type NavMenuItem } from "@/lib/constants";
 import { supabase } from "@/lib/supabase";
@@ -161,10 +173,10 @@ export function Header() {
         <DropdownMenu key={item.label}>
           <DropdownMenuTrigger
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1",
+              "px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 whitespace-nowrap border-b-2",
               isActive
-                ? "bg-accent/10 text-accent"
-                : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                ? "border-[#071D36] text-[#071D36] font-semibold"
+                : "border-transparent text-[#071D36] hover:text-[#5F7F64]"
             )}
           >
             {item.label}
@@ -192,10 +204,10 @@ export function Header() {
         <DropdownMenu key={item.label}>
           <DropdownMenuTrigger
             className={cn(
-              "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1",
+              "px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 whitespace-nowrap border-b-2",
               isActive
-                ? "bg-accent/10 text-accent"
-                : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                ? "border-[#071D36] text-[#071D36] font-semibold"
+                : "border-transparent text-[#071D36] hover:text-[#5F7F64]"
             )}
           >
             {item.label}
@@ -222,10 +234,10 @@ export function Header() {
         key={item.label}
         to={item.href || "#"}
         className={cn(
-          "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+          "px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap border-b-2",
           location.pathname === item.href
-            ? "bg-accent/10 text-accent"
-            : "text-muted-foreground hover:text-accent hover:bg-secondary"
+            ? "border-[#071D36] text-[#071D36] font-semibold"
+            : "border-transparent text-[#071D36] hover:text-[#5F7F64]"
         )}
       >
         {item.label}
@@ -251,8 +263,8 @@ export function Header() {
             className={cn(
               "px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-between w-full",
               isActive
-                ? "bg-accent/10 text-accent"
-                : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                ? "bg-secondary text-primary font-semibold"
+                : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
             )}
           >
             {item.label}
@@ -273,8 +285,8 @@ export function Header() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-colors block",
                     location.pathname === `/category/${cat.slug}`
-                      ? "bg-accent/10 text-accent"
-                      : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                      ? "bg-secondary text-primary font-semibold"
+                      : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
                   )}
                 >
                   {cat.name}
@@ -296,8 +308,8 @@ export function Header() {
             className={cn(
               "px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-between w-full",
               isActive
-                ? "bg-accent/10 text-accent"
-                : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                ? "bg-secondary text-primary font-semibold"
+                : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
             )}
           >
             {item.label}
@@ -318,8 +330,8 @@ export function Header() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-colors block",
                     location.pathname === `/category/${cat.slug}`
-                      ? "bg-accent/10 text-accent"
-                      : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                      ? "bg-secondary text-primary font-semibold"
+                      : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
                   )}
                 >
                   {cat.name}
@@ -341,8 +353,8 @@ export function Header() {
             className={cn(
               "px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-between w-full",
               isActive
-                ? "bg-accent/10 text-accent"
-                : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                ? "bg-secondary text-primary font-semibold"
+                : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
             )}
           >
             {item.label}
@@ -363,8 +375,8 @@ export function Header() {
                   className={cn(
                     "px-4 py-2 rounded-lg text-sm font-medium transition-colors block",
                     location.pathname === child.href
-                      ? "bg-accent/10 text-accent"
-                      : "text-muted-foreground hover:text-accent hover:bg-secondary"
+                      ? "bg-secondary text-primary font-semibold"
+                      : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
                   )}
                 >
                   {child.label}
@@ -384,8 +396,8 @@ export function Header() {
         className={cn(
           "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
           location.pathname === item.href
-            ? "bg-accent/10 text-accent"
-            : "text-muted-foreground hover:text-accent hover:bg-secondary"
+            ? "bg-secondary text-primary font-semibold"
+            : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
         )}
       >
         {item.label}
@@ -393,152 +405,227 @@ export function Header() {
     );
   };
 
+  const allBrowseCategories = [
+    ...bookCategories,
+    ...otherCategories,
+  ];
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-      <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className="h-[72px] w-auto object-contain"
-            loading="eager"
-          />
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => renderDesktopNavItem(item))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <div
-            ref={searchContainerRef}
-            className="relative hidden md:block w-48 lg:w-56"
-          >
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchDropdownOpen(true)}
-              className="pl-9 h-9"
-            />
-            {searchDropdownOpen && searchQuery.trim().length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 rounded-lg border bg-popover text-popover-foreground shadow-md z-50 overflow-hidden">
-                {isSearching || searchResults === null ? (
-                  <div className="p-4 text-sm text-muted-foreground">Searching...</div>
-                ) : searchResults.length === 0 ? (
-                  <div className="p-4 text-sm text-muted-foreground">No products found</div>
-                ) : (
-                  <ul className="max-h-80 overflow-y-auto py-1">
-                    {searchResults.map((item) => (
-                      <li key={item.id}>
-                        <Link
-                          to={`/product/${item.id}`}
-                          state={{ from: location.pathname }}
-                          onClick={() => {
-                            setSearchQuery("");
-                            setSearchDropdownOpen(false);
-                          }}
-                          className="flex items-center gap-3 px-3 py-2 hover:bg-accent focus:bg-accent outline-none"
-                        >
-                          <div className="w-10 h-10 flex-shrink-0 rounded bg-secondary/50 flex items-center justify-center overflow-hidden">
-                            {item.image ? (
-                              <img
-                                src={item.image}
-                                alt=""
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <BookOpen className="h-5 w-5 text-muted-foreground/50" />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium text-sm line-clamp-2 truncate">
-                              {item.title ?? "Untitled"}
-                            </div>
-                            <div className="text-xs text-yellow-400 font-semibold">Rs. {item.price ?? 0}</div>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
+    <header className="sticky top-0 z-50 w-full shadow-[0_4px_20px_-8px_rgba(7,29,54,0.08)]">
+      {/* Top announcement bar */}
+      <div className="bg-[#5F7F64] text-white text-xs">
+        <div className="container flex flex-wrap items-center justify-between gap-2 py-2">
+          <span className="font-medium">Welcome to UMAR KITAB GHAR — Your Trusted Learning Partner</span>
+          <div className="flex flex-wrap items-center gap-4 text-white/90">
+            <span className="inline-flex items-center gap-1.5">
+              <Truck className="h-3.5 w-3.5" />
+              Free Delivery on qualifying orders
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="h-3.5 w-3.5" />
+              Karachi, Pakistan
+            </span>
           </div>
-          {user ? (
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
-              >
-                <Link to="/account">Account</Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
-              >
-                Logout
-              </Button>
+        </div>
+      </div>
+
+      <div className="bg-[#FFFDF8] border-b border-[#E8DEC8]">
+        {/* Main header row */}
+        <div className="container py-3 md:py-4">
+          <div className="flex items-center gap-3 lg:gap-6">
+            <Link to="/" className="flex shrink-0 items-center gap-2">
+              <img src={logo} alt="Umar Kitab Ghar" className="h-14 md:h-16 w-auto object-contain" loading="eager" />
+            </Link>
+
+            {/* Search — desktop */}
+            <div
+              ref={searchContainerRef}
+              className="relative hidden lg:flex flex-1 max-w-2xl mx-auto"
+            >
+              <div className="flex w-full items-stretch rounded-xl border border-[#E8DEC8] bg-white overflow-hidden shadow-sm">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type="search"
+                    placeholder="Search books, stationery, courses..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setSearchDropdownOpen(true)}
+                    className="h-11 border-0 rounded-none pl-10 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent"
+                  />
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="hidden xl:flex items-center gap-1 border-l border-[#E8DEC8] px-4 text-sm text-[#071D36] hover:bg-[#DDE8D8]/40 outline-none">
+                    All Categories
+                    <ChevronDown className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
+                    {allBrowseCategories.map((cat) => (
+                      <DropdownMenuItem key={cat.id} asChild>
+                        <Link to={`/category/${cat.slug}`}>{cat.name}</Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <button
+                  type="button"
+                  className="flex h-11 w-12 shrink-0 items-center justify-center bg-[#071D36] text-white hover:bg-[#071D36]/90"
+                  aria-label="Search"
+                  onClick={() => searchQuery.trim() && runSearch(searchQuery)}
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </div>
+              {searchDropdownOpen && searchQuery.trim().length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-[#E8DEC8] bg-white shadow-lg z-50 overflow-hidden">
+                  {isSearching || searchResults === null ? (
+                    <div className="p-4 text-sm text-muted-foreground">Searching...</div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground">No products found</div>
+                  ) : (
+                    <ul className="max-h-80 overflow-y-auto py-1">
+                      {searchResults.map((item) => (
+                        <li key={item.id}>
+                          <Link
+                            to={`/product/${item.id}`}
+                            state={{ from: location.pathname }}
+                            onClick={() => {
+                              setSearchQuery("");
+                              setSearchDropdownOpen(false);
+                            }}
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-[#DDE8D8]/50 outline-none"
+                          >
+                            <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-[#DDE8D8]/50 flex items-center justify-center overflow-hidden">
+                              {item.image ? (
+                                <img src={item.image} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <BookOpen className="h-5 w-5 text-muted-foreground/50" />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-sm line-clamp-2">{item.title ?? "Untitled"}</div>
+                              <div className="text-xs text-price">Rs. {item.price ?? 0}</div>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+
+            {/* Utility links */}
+            <div className="hidden md:flex items-center gap-5 lg:gap-6 ml-auto shrink-0">
+              <Link
+                to="/track-order"
+                className="flex flex-col items-center gap-0.5 text-[#071D36] hover:text-[#5F7F64] transition-colors"
               >
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+                <Truck className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Track Order</span>
+              </Link>
+              {user ? (
+                <Link
+                  to="/account"
+                  className="flex flex-col items-center gap-0.5 text-[#071D36] hover:text-[#5F7F64] transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-[10px] font-medium">Account</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex flex-col items-center gap-0.5 text-[#071D36] hover:text-[#5F7F64] transition-colors"
+                >
+                  <User className="h-5 w-5" />
+                  <span className="text-[10px] font-medium whitespace-nowrap">Login / Sign Up</span>
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => navigate(user ? "/wishlist" : "/login")}
+                className="flex flex-col items-center gap-0.5 text-[#071D36] hover:text-[#5F7F64] transition-colors"
+                aria-label="Wishlist"
               >
-                <Link to="/signup">Sign Up</Link>
-              </Button>
+                <Heart className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Wishlist</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/checkout")}
+                className="relative flex flex-col items-center gap-0.5 text-[#071D36] hover:text-[#5F7F64] transition-colors"
+                aria-label="Cart"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Cart</span>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 right-0 h-4 min-w-4 px-1 rounded-full bg-[#5F7F64] text-white text-[10px] flex items-center justify-center">
+                    {cartItemCount > 9 ? "9+" : cartItemCount}
+                  </span>
+                )}
+              </button>
             </div>
-          )}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate(user ? "/wishlist" : "/login")}
-            title="Wishlist"
-            aria-label="Wishlist"
-            className="border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
-          >
-            <Heart className="h-5 w-5" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => navigate("/checkout")}
-            className="relative border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
-            title="View Cart"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
-                {cartItemCount > 9 ? "9+" : cartItemCount}
-              </span>
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden ml-auto shrink-0"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
+        </div>
+
+        {/* Second nav row — desktop */}
+        <div className="hidden lg:block border-t border-[#E8DEC8] bg-[#FBF7EF]/50">
+          <div className="container flex items-center gap-3 py-2.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-xl bg-[#5F7F64] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#5F7F64]/90 outline-none transition-colors">
+                <LayoutGrid className="h-4 w-4" />
+                Browse All Categories
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 max-h-96 overflow-y-auto">
+                {allBrowseCategories.length > 0 ? (
+                  allBrowseCategories.map((cat) => (
+                    <DropdownMenuItem key={cat.id} asChild>
+                      <Link to={`/category/${cat.slug}`}>{cat.name}</Link>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem disabled>No categories loaded</DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <nav className="flex items-center gap-0.5 overflow-x-auto no-scrollbar flex-1">
+              {navItems.map((item) => {
+                const isHome = item.href === "/";
+                const isActive = isHome
+                  ? location.pathname === "/"
+                  : item.href
+                    ? location.pathname === item.href
+                    : isActiveRoute(item);
+                return item.label === "Book" || item.label === "Other Items" ? (
+                  renderDesktopNavItem(item)
+                ) : (
+                  <Link
+                    key={item.label}
+                    to={item.href || "#"}
+                    className={cn(
+                      "px-4 py-2 text-sm font-medium text-[#071D36] whitespace-nowrap transition-colors border-b-2 border-transparent",
+                      isActive
+                        ? "border-[#071D36] text-[#071D36] font-semibold"
+                        : "hover:text-[#5F7F64]"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </div>
       </div>
 
@@ -550,7 +637,7 @@ export function Header() {
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 variant="outline"
-                className="justify-center gap-2 border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+                className="justify-center gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 onClick={() => {
                   navigate(user ? "/wishlist" : "/login");
                   setIsMenuOpen(false);
@@ -563,7 +650,7 @@ export function Header() {
                 <>
                   <Button
                     variant="outline"
-                    className="justify-center border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+                    className="justify-center border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                     asChild
                   >
                     <Link to="/account" onClick={() => setIsMenuOpen(false)}>
@@ -572,7 +659,7 @@ export function Header() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="justify-center border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+                    className="justify-center border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                     onClick={async () => {
                       await handleLogout();
                       setIsMenuOpen(false);
@@ -585,7 +672,7 @@ export function Header() {
                 <>
                   <Button
                     variant="outline"
-                    className="justify-center border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+                    className="justify-center border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                     asChild
                   >
                     <Link to="/login" onClick={() => setIsMenuOpen(false)}>
@@ -594,7 +681,7 @@ export function Header() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="justify-center border-[#FFD700] text-[#FFD700] hover:bg-[#FFD700] hover:text-[#050B2D] font-semibold"
+                    className="justify-center border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                     asChild
                   >
                     <Link to="/signup" onClick={() => setIsMenuOpen(false)}>

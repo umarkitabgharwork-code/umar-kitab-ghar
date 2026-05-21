@@ -242,7 +242,7 @@ const ProductDetailPage = () => {
 
   if (!id) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -259,7 +259,7 @@ const ProductDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container max-w-4xl">
           <Skeleton className="h-8 w-48 mb-6" />
           <div className="grid md:grid-cols-2 gap-8">
@@ -278,7 +278,7 @@ const ProductDetailPage = () => {
 
   if (isError || !product) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container max-w-2xl">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -296,7 +296,7 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-4xl">
         <Button variant="ghost" className="mb-6" size="sm" onClick={handleBackToShop}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -305,7 +305,7 @@ const ProductDetailPage = () => {
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Image gallery */}
-          <Card variant="elevated">
+          <Card variant="elevated" className="page-card">
             <CardContent className="p-4 relative">
               <div className="absolute top-2 right-2 z-10">
                 <WishlistButton productId={product.id} />
@@ -331,8 +331,8 @@ const ProductDetailPage = () => {
                       alt=""
                       className={`w-16 h-16 object-cover rounded cursor-pointer border ${
                         selectedImage === img
-                          ? "border-yellow-400"
-                          : "border-white/20"
+                          ? "border-accent"
+                          : "border-[#E8DEC8]"
                       }`}
                     />
                   ))}
@@ -343,8 +343,8 @@ const ProductDetailPage = () => {
 
           {/* Details */}
           <div className="space-y-4">
-            <h1 className="text-2xl md:text-3xl font-bold">{product.title ?? "Untitled Product"}</h1>
-            <p className="text-lg text-yellow-400 font-semibold">Rs. {product.price ?? 0}</p>
+            <h1 className="page-heading text-2xl md:text-3xl">{product.title ?? "Untitled Product"}</h1>
+            <p className="text-lg text-price font-semibold">Rs. {product.price ?? 0}</p>
             <p className="text-sm text-muted-foreground">
               {outOfStock ? (
                 <span className="font-medium text-red-600">{getStockStatus()}</span>
@@ -393,6 +393,7 @@ const ProductDetailPage = () => {
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 size="lg"
+                variant="hero"
                 className="w-full sm:w-auto"
                 onClick={handleAddToCart}
                 disabled={outOfStock}
@@ -549,7 +550,7 @@ const ProductDetailPage = () => {
                             {item.name}
                           </h3>
                         </Link>
-                        <div className="text-sm text-yellow-400 font-semibold">
+                        <div className="text-sm text-price font-semibold">
                           Rs. {item.price}
                         </div>
                       </div>

@@ -949,19 +949,19 @@ export default function Admin() {
   if (authorized === false) return null;
 
   const sectionCardClass =
-    "bg-[#0b1a4a] rounded-xl p-6 border border-blue-800 space-y-4";
+    "bg-card rounded-2xl p-6 border border-border space-y-4 shadow-soft";
 
   const inputClass =
-    "w-full px-3 py-2 rounded-md bg-[#071235] border border-blue-800 text-white placeholder:text-blue-200/60 focus:outline-none focus:ring-2 focus:ring-blue-500/40";
+    "w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
   const selectClass =
-    "w-full px-3 py-2 rounded-md bg-[#071235] border border-blue-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40";
+    "w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
   const buttonClass =
-    "px-4 py-2 rounded-md bg-[#FFD700] text-[#050B2D] font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed";
+    "px-4 py-2 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed";
 
   const ghostButtonClass =
-    "px-3 py-2 rounded-md border border-blue-800 text-white hover:bg-white/5 disabled:opacity-60 disabled:cursor-not-allowed";
+    "px-3 py-2 rounded-xl border border-border text-foreground hover:bg-secondary/60 disabled:opacity-60 disabled:cursor-not-allowed";
 
   const badgeBase =
     "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border";
@@ -1018,8 +1018,8 @@ export default function Admin() {
     <div className="max-w-7xl mx-auto px-4 space-y-8 py-8">
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h2>
-          <p className="text-blue-200/80 text-sm mt-1">Manage products, deals, banners, blogs, courses, and orders.</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground">Admin Dashboard</h2>
+          <p className="text-muted-foreground text-sm mt-1">Manage products, deals, banners, blogs, courses, and orders.</p>
         </div>
         {pendingReviewCount > 0 ? (
           <span className="inline-flex items-center rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-200 text-sm font-semibold px-3 py-1.5">
@@ -1030,7 +1030,7 @@ export default function Admin() {
 
       {/* ===== Create Coupon ===== */}
       <section className={sectionCardClass}>
-        <h3 className="text-lg font-semibold text-white">Create Coupon</h3>
+        <h3 className="text-lg font-semibold text-foreground">Create Coupon</h3>
         <form onSubmit={handleCreateCoupon} className="grid gap-3 max-w-lg">
           <input
             placeholder="Coupon code"
@@ -1056,7 +1056,7 @@ export default function Admin() {
             className={inputClass}
           />
           <label className="grid gap-1">
-            <span className="text-sm text-blue-200/80">Expiry date</span>
+            <span className="text-sm text-muted-foreground">Expiry date</span>
             <input
               type="datetime-local"
               value={couponExpiresAt}
@@ -1080,7 +1080,7 @@ export default function Admin() {
 
       {/* ===== Add New Book ===== */}
       <section className={sectionCardClass}>
-        <h3 className="text-lg font-semibold text-white">Add Book</h3>
+        <h3 className="text-lg font-semibold text-foreground">Add Book</h3>
         <form onSubmit={handleCreateBook} className="grid gap-3 max-w-lg">
           <select
             value={selectedCategory}
@@ -1114,7 +1114,7 @@ export default function Admin() {
               placeholder="Enter publisher name"
               value={newPublisherName}
               onChange={(e) => setNewPublisherName(e.target.value)}
-              className="w-full mt-2 px-3 py-2 rounded-md bg-[#0b1a4a] border border-white/20 text-white"
+              className="w-full mt-2 px-3 py-2 rounded-xl bg-background border border-border text-foreground"
             />
           )}
 
@@ -1197,7 +1197,7 @@ export default function Admin() {
               const files = e.target.files ? Array.from(e.target.files) : [];
               setSelectedImages(files);
             }}
-            className="text-sm text-blue-200/80 file:mr-4 file:rounded-md file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-white hover:file:bg-white/15"
+            className="text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-foreground hover:file:bg-secondary"
           />
 
           <textarea
@@ -1218,21 +1218,21 @@ export default function Admin() {
       <section className={sectionCardClass}>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h3 className="text-lg font-semibold text-white">Manage Products</h3>
-            <p className="text-blue-200/80 text-sm">10 products per page • Search + Category filter</p>
+            <h3 className="text-lg font-semibold text-foreground">Manage Products</h3>
+            <p className="text-muted-foreground text-sm">10 products per page • Search + Category filter</p>
           </div>
-          <div className="text-sm text-blue-200/80">
-            Showing <span className="font-semibold text-white">{filteredProducts.length}</span> product(s)
+          <div className="text-sm text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{filteredProducts.length}</span> product(s)
           </div>
         </div>
         {productsLoading ? (
-          <p className="text-blue-200/80">Loading products...</p>
+          <p className="text-muted-foreground">Loading products...</p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="md:col-span-2">
                 <label className="grid gap-1">
-                  <span className="text-sm text-blue-200/80">Search</span>
+                  <span className="text-sm text-muted-foreground">Search</span>
                   <input
                     placeholder="Search product title..."
                     value={productSearch}
@@ -1246,7 +1246,7 @@ export default function Admin() {
               </div>
               <div>
                 <label className="grid gap-1">
-                  <span className="text-sm text-blue-200/80">Category</span>
+                  <span className="text-sm text-muted-foreground">Category</span>
                   <select
                     value={productCategoryFilter}
                     onChange={(e) => {
@@ -1266,9 +1266,9 @@ export default function Admin() {
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-lg border border-blue-800">
+            <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm">
-                <thead className="bg-white/5 text-blue-100">
+                <thead className="bg-muted text-muted-foreground">
                   <tr>
                     <th className="text-left font-semibold px-4 py-3">Title</th>
                     <th className="text-left font-semibold px-4 py-3">Price</th>
@@ -1278,7 +1278,7 @@ export default function Admin() {
                     <th className="text-left font-semibold px-4 py-3">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-blue-800/60">
+                <tbody className="divide-y divide-border">
                 {pagedProducts.map((product) => {
                 const isActive = !!product.is_active;
                 const hasLowStock =
@@ -1315,13 +1315,13 @@ export default function Admin() {
                     key={product.id}
                     className={hasLowStock ? "bg-orange-500/10" : ""}
                   >
-                    <td className="px-4 py-3 text-white">
+                    <td className="px-4 py-3 text-foreground">
                       <div className="font-medium">{product.title ?? "Untitled"}</div>
-                      <div className="text-xs text-blue-200/70">ID: {product.id}</div>
+                      <div className="text-xs text-muted-foreground">ID: {product.id}</div>
                     </td>
-                    <td className="px-4 py-3 text-white">Rs. {product.price ?? 0}</td>
-                    <td className="px-4 py-3 text-white">{product.stock ?? 0}</td>
-                    <td className="px-4 py-3 text-white">{isActive ? "Active" : "Inactive"}</td>
+                    <td className="px-4 py-3 text-foreground">Rs. {product.price ?? 0}</td>
+                    <td className="px-4 py-3 text-foreground">{product.stock ?? 0}</td>
+                    <td className="px-4 py-3 text-foreground">{isActive ? "Active" : "Inactive"}</td>
                     <td className="px-4 py-3">
                       {outOfStock ? (
                         <span className={`${badgeBase} bg-red-500/15 border-red-500/30 text-red-200`}>
@@ -1382,8 +1382,8 @@ export default function Admin() {
                     key={n}
                     className={
                       n === safeProductPage
-                        ? "px-3 py-2 rounded-md bg-white/10 border border-blue-700 text-white font-semibold"
-                        : "px-3 py-2 rounded-md border border-blue-800 text-blue-100 hover:bg-white/5"
+                        ? "px-3 py-2 rounded-md bg-secondary border border-border text-foreground font-semibold"
+                        : "px-3 py-2 rounded-xl border border-border text-muted-foreground hover:bg-secondary/60"
                     }
                     onClick={() => setProductPage(n)}
                   >
@@ -1405,11 +1405,11 @@ export default function Admin() {
 
       {/* ===== Manage Book Details (use table action) ===== */}
       <section className={sectionCardClass}>
-        <h3 className="text-lg font-semibold text-white">Manage Book Details</h3>
-        <p className="text-blue-200/80 text-sm max-w-2xl">
+        <h3 className="text-lg font-semibold text-foreground">Manage Book Details</h3>
+        <p className="text-muted-foreground text-sm max-w-2xl">
           Update publisher, language, and category-specific fields (genre or subject/class) for an existing book.
-          In <span className="text-white font-medium">Manage Products</span> above, click{" "}
-          <span className="text-white font-medium">Manage Details</span> on a row to open the editor.
+          In <span className="text-foreground font-medium">Manage Products</span> above, click{" "}
+          <span className="text-foreground font-medium">Manage Details</span> on a row to open the editor.
         </p>
       </section>
 
@@ -1417,8 +1417,8 @@ export default function Admin() {
       <section className={sectionCardClass}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between flex-wrap">
           <div>
-            <h3 className="text-lg font-semibold text-white">Manage Reviews</h3>
-            <p className="text-blue-200/80 text-sm">Approve or remove product and store reviews.</p>
+            <h3 className="text-lg font-semibold text-foreground">Manage Reviews</h3>
+            <p className="text-muted-foreground text-sm">Approve or remove product and store reviews.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {(["all", "pending", "approved"] as const).map((f) => (
@@ -1428,7 +1428,7 @@ export default function Admin() {
                 onClick={() => setReviewFilter(f)}
                 className={
                   reviewFilter === f
-                    ? "px-3 py-2 rounded-md bg-white/10 border border-blue-700 text-white font-semibold text-sm"
+                    ? "px-3 py-2 rounded-md bg-secondary border border-border text-foreground font-semibold text-sm"
                     : `${ghostButtonClass} text-sm`
                 }
               >
@@ -1439,11 +1439,11 @@ export default function Admin() {
         </div>
 
         {reviewsLoading ? (
-          <p className="text-blue-200/80">Loading reviews...</p>
+          <p className="text-muted-foreground">Loading reviews...</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-blue-800">
+          <div className="overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-sm">
-              <thead className="bg-white/5 text-blue-100">
+              <thead className="bg-muted text-muted-foreground">
                 <tr>
                   <th className="text-left font-semibold px-4 py-3">User Name</th>
                   <th className="text-left font-semibold px-4 py-3">Phone</th>
@@ -1455,10 +1455,10 @@ export default function Admin() {
                   <th className="text-left font-semibold px-4 py-3">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-blue-800/60">
+              <tbody className="divide-y divide-border">
                 {filteredReviews.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-6 text-center text-blue-200/80">
+                    <td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">
                       No reviews in this filter.
                     </td>
                   </tr>
@@ -1475,21 +1475,21 @@ export default function Admin() {
                         key={rev.id}
                         className={pendingRow ? "bg-yellow-500/10" : ""}
                       >
-                        <td className="px-4 py-3 text-white align-top max-w-[140px]">
+                        <td className="px-4 py-3 text-foreground align-top max-w-[140px]">
                           {rev.user_name?.trim() || "—"}
                         </td>
-                        <td className="px-4 py-3 text-white align-top whitespace-nowrap">
+                        <td className="px-4 py-3 text-foreground align-top whitespace-nowrap">
                           {rev.phone?.trim() || "—"}
                         </td>
-                        <td className="px-4 py-3 text-white align-top font-mono text-xs max-w-[120px] break-all">
+                        <td className="px-4 py-3 text-foreground align-top font-mono text-xs max-w-[120px] break-all">
                           {rev.product_id ?? "—"}
                         </td>
-                        <td className="px-4 py-3 text-white align-top">{rev.rating}</td>
-                        <td className="px-4 py-3 text-white align-top max-w-[220px]">
+                        <td className="px-4 py-3 text-foreground align-top">{rev.rating}</td>
+                        <td className="px-4 py-3 text-foreground align-top max-w-[220px]">
                           <span className="line-clamp-3">{rev.comment?.trim() || "—"}</span>
                         </td>
-                        <td className="px-4 py-3 text-white align-top whitespace-nowrap">{statusLabel}</td>
-                        <td className="px-4 py-3 text-white align-top whitespace-nowrap text-xs">
+                        <td className="px-4 py-3 text-foreground align-top whitespace-nowrap">{statusLabel}</td>
+                        <td className="px-4 py-3 text-foreground align-top whitespace-nowrap text-xs">
                           {new Date(rev.created_at).toLocaleString()}
                         </td>
                         <td className="px-4 py-3 align-top">
@@ -1524,10 +1524,10 @@ export default function Admin() {
 
       {/* ===== Deals Manager ===== */}
       <section className={sectionCardClass}>
-        <h3 className="text-lg font-semibold text-white">Deals Manager</h3>
+        <h3 className="text-lg font-semibold text-foreground">Deals Manager</h3>
         <form onSubmit={handleCreateDeal} className="grid gap-3 max-w-2xl">
           <label className="grid gap-1">
-            <span className="text-sm text-blue-200/80">Deal Type</span>
+            <span className="text-sm text-muted-foreground">Deal Type</span>
             <select
               value={dealType}
               onChange={(e) => setDealType(e.target.value as "product" | "custom")}
@@ -1571,12 +1571,12 @@ export default function Admin() {
 
           {dealType === "custom" ? (
             <label className="grid gap-1">
-              <span className="text-sm text-blue-200/80">Image Upload</span>
+              <span className="text-sm text-muted-foreground">Image Upload</span>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setCustomDealImage(e.target.files?.[0] ?? null)}
-                className="text-sm text-blue-200/80 file:mr-4 file:rounded-md file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-white hover:file:bg-white/15"
+                className="text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-foreground hover:file:bg-secondary"
               />
             </label>
           ) : null}
@@ -1604,7 +1604,7 @@ export default function Admin() {
 
       {/* ===== Blog Manager ===== */}
       <section className={sectionCardClass}>
-        <h3 className="text-lg font-semibold text-white">Blog Manager</h3>
+        <h3 className="text-lg font-semibold text-foreground">Blog Manager</h3>
         <form onSubmit={handleCreateBlogPost} className="grid gap-3 max-w-3xl">
           <input
             placeholder="Blog Title"
@@ -1649,7 +1649,7 @@ export default function Admin() {
 
 <section className={sectionCardClass}>
   <div className="flex flex-col gap-4">
-    <h3 className="text-lg font-semibold text-white">
+    <h3 className="text-lg font-semibold text-foreground">
       Manage Courses
     </h3>
 
@@ -1662,15 +1662,15 @@ export default function Admin() {
 {/* ===== Banner Manager ===== */}
       {/* ===== Banner Manager ===== */}
       <section className={sectionCardClass}>
-        <h3 className="text-lg font-semibold text-white">Banner Manager</h3>
+        <h3 className="text-lg font-semibold text-foreground">Banner Manager</h3>
         <form onSubmit={handleCreateBanner} className="grid gap-3 max-w-3xl">
           <label className="grid gap-1">
-            <span className="text-sm text-blue-200/80">Image upload</span>
+            <span className="text-sm text-muted-foreground">Image upload</span>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setBannerImage(e.target.files?.[0] ?? null)}
-              className="text-sm text-blue-200/80 file:mr-4 file:rounded-md file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-white hover:file:bg-white/15"
+              className="text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-foreground hover:file:bg-secondary"
             />
           </label>
           <input
@@ -1718,30 +1718,30 @@ export default function Admin() {
         </form>
 
         <div className="pt-2">
-          <h4 className="text-white font-semibold mb-2">All Banners</h4>
+          <h4 className="text-foreground font-semibold mb-2">All Banners</h4>
           {bannersLoading ? (
-            <p className="text-blue-200/80">Loading banners…</p>
+            <p className="text-muted-foreground">Loading banners…</p>
           ) : banners.length === 0 ? (
-            <p className="text-blue-200/80">No banners found.</p>
+            <p className="text-muted-foreground">No banners found.</p>
           ) : (
             <div className="grid gap-3">
               {banners.map((b) => (
                 <div
                   key={b.id}
-                  className="grid md:grid-cols-[160px_1fr] gap-3 p-3 rounded-lg border border-blue-800 bg-[#071235]"
+                  className="grid md:grid-cols-[160px_1fr] gap-3 p-3 rounded-lg border border-border bg-muted"
                 >
-                  <div className="w-full h-24 rounded-lg overflow-hidden border border-blue-800 bg-[#0b1a4a] flex items-center justify-center">
+                  <div className="w-full h-24 rounded-lg overflow-hidden border border-border bg-card flex items-center justify-center">
                     {b.image_url ? (
                       <img src={b.image_url} alt={b.title ?? "Banner"} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-blue-200/80 text-xs">{b.video_url ? "Video banner" : "No preview"}</span>
+                      <span className="text-muted-foreground text-xs">{b.video_url ? "Video banner" : "No preview"}</span>
                     )}
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div>
-                        <div className="font-bold text-white">{b.title ?? "(Untitled)"}</div>
-                        <div className="text-blue-200/70 text-xs">
+                        <div className="font-bold text-foreground">{b.title ?? "(Untitled)"}</div>
+                        <div className="text-muted-foreground text-xs">
                           Sort: {b.sort_order ?? 0} • {b.is_active ? "Active" : "Inactive"}
                         </div>
                       </div>
@@ -1761,15 +1761,15 @@ export default function Admin() {
                       </div>
                     </div>
                     {b.subtitle ? (
-                      <div className="text-blue-200/80 text-sm">{b.subtitle}</div>
+                      <div className="text-muted-foreground text-sm">{b.subtitle}</div>
                     ) : null}
                     {b.button_text && b.button_link ? (
-                      <div className="text-blue-200/70 text-xs">
+                      <div className="text-muted-foreground text-xs">
                         CTA: {b.button_text} → {b.button_link}
                       </div>
                     ) : null}
                     {b.video_url ? (
-                      <div className="text-blue-200/70 text-xs">Video: {b.video_url}</div>
+                      <div className="text-muted-foreground text-xs">Video: {b.video_url}</div>
                     ) : null}
                   </div>
                 </div>
@@ -1783,8 +1783,8 @@ export default function Admin() {
       <section className={sectionCardClass}>
         <div className="flex items-end justify-between gap-4 flex-wrap mb-4">
           <div>
-            <h3 className="text-lg font-semibold text-white">Orders Table</h3>
-            <p className="text-blue-200/80 text-sm">Key metrics and recent orders.</p>
+            <h3 className="text-lg font-semibold text-foreground">Orders Table</h3>
+            <p className="text-muted-foreground text-sm">Key metrics and recent orders.</p>
           </div>
         </div>
 
@@ -1823,11 +1823,11 @@ export default function Admin() {
         </div>
 
         {ordersLoading ? (
-          <p className="text-blue-200/80">Loading orders...</p>
+          <p className="text-muted-foreground">Loading orders...</p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-blue-800">
+          <div className="overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-sm">
-              <thead className="bg-white/5 text-blue-100">
+              <thead className="bg-muted text-muted-foreground">
                 <tr>
                   <th className="text-left font-semibold px-4 py-3">Order Code</th>
                   <th className="text-left font-semibold px-4 py-3">Name</th>
@@ -1836,13 +1836,13 @@ export default function Admin() {
                   <th className="text-left font-semibold px-4 py-3">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-blue-800/60">
+              <tbody className="divide-y divide-border">
                 {filteredOrders.map((order) => (
                   <tr key={order.id}>
-                    <td className="px-4 py-3 text-white">{order.order_code}</td>
-                    <td className="px-4 py-3 text-white">{order.customer_name}</td>
-                    <td className="px-4 py-3 text-white">{order.total_amount}</td>
-                    <td className="px-4 py-3 text-white">
+                    <td className="px-4 py-3 text-foreground">{order.order_code}</td>
+                    <td className="px-4 py-3 text-foreground">{order.customer_name}</td>
+                    <td className="px-4 py-3 text-foreground">{order.total_amount}</td>
+                    <td className="px-4 py-3 text-foreground">
                       <select
                         value={order.status}
                         onChange={(e) => updateStatus(order.id, e.target.value)}
@@ -2380,9 +2380,9 @@ export default function Admin() {
 
 function StatCard({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-xl border border-blue-800 bg-[#071235] p-4 text-center">
-      <div className="text-xl font-bold text-white">{value}</div>
-      <div className="text-sm text-blue-200/80 mt-1">{label}</div>
+    <div className="rounded-xl border border-border bg-muted p-4 text-center">
+      <div className="text-xl font-bold text-foreground">{value}</div>
+      <div className="text-sm text-muted-foreground mt-1">{label}</div>
     </div>
   );
 }

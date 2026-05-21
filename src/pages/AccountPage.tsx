@@ -88,9 +88,9 @@ const AccountPage = () => {
 
   if (authLoading) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container max-w-3xl">
-          <Card>
+          <Card className="page-card-ivory">
             <CardContent className="p-8">
               <div className="flex items-center justify-center gap-2 text-muted-foreground">
                 <Skeleton className="h-6 w-32" />
@@ -108,7 +108,7 @@ const AccountPage = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-3xl space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl md:text-3xl font-bold">My Account</h1>
@@ -118,9 +118,9 @@ const AccountPage = () => {
           </Button>
         </div>
 
-        <Card>
+        <Card className="page-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-[#071D36]">
               <User className="h-5 w-5" />
               Profile
             </CardTitle>
@@ -147,9 +147,9 @@ const AccountPage = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="page-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-[#071D36]">
               <Package className="h-5 w-5" />
               Order History
             </CardTitle>

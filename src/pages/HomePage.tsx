@@ -1,14 +1,7 @@
-import { Star } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Star,
   BookOpen,
   FileText,
-  Clock,
   Truck,
   ArrowRight,
   Flame,
@@ -16,7 +9,24 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Upload,
+  GraduationCap,
+  PenLine,
+  Package,
+  Headphones,
+  RotateCcw,
+  Shield,
+  Lock,
+  Heart,
+  MapPin,
+  type LucideIcon,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/lib/constants";
 import {
   getActiveBanners,
@@ -30,12 +40,27 @@ import {
 } from "@/services/api";
 import { supabase } from "@/lib/supabase";
 import { TestimonialSlider, type Review as StoreReview } from "@/components/TestimonialSlider";
+import { cn } from "@/lib/utils";
 
-const features = [
-  { icon: Star, title: "Quality Products", description: "Original books and premium stationery" },
-  { icon: Clock, title: "Quick Processing", description: "Fast order preparation and dispatch" },
-  { icon: Truck, title: "Easy Delivery", description: "Pickup or home delivery options" },
-];
+const FEATURE_STRIP = [
+  { icon: BookOpen, label: "Wide Range of Books" },
+  { icon: GraduationCap, label: "School Course Orders" },
+  { icon: Upload, label: "Upload Your List" },
+  { icon: MapPin, label: "Local Support" },
+] as const;
+
+const HERO_BENEFITS = [
+  { icon: Truck, title: "Free Delivery", subtitle: "On qualifying orders" },
+  { icon: RotateCcw, title: "Easy Returns", subtitle: "Hassle-free process" },
+  { icon: Headphones, title: "24/7 Support", subtitle: "We're here to help" },
+] as const;
+
+const TRUST_STRIP = [
+  { icon: Shield, title: "100% Original Products", subtitle: "Authentic books & stationery" },
+  { icon: Lock, title: "Secure Payments", subtitle: "Safe checkout every time" },
+  { icon: Truck, title: "Fast Delivery", subtitle: "Pickup or home delivery" },
+  { icon: Heart, title: "Happy Customers", subtitle: "Trusted since 1988" },
+] as const;
 
 function stripHtml(html: string): string {
   const div = document.createElement("div");
@@ -48,6 +73,85 @@ function previewText(content: string | null, maxLen: number): string {
   const text = stripHtml(content);
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen).trim() + "…";
+}
+
+function categoryHref(categories: NavCategory[], ...keywords: string[]): string {
+  const match = categories.find((c) => {
+    const slug = c.slug.toLowerCase();
+    const name = c.name.toLowerCase();
+    return keywords.some((k) => slug.includes(k) || name.includes(k));
+  });
+  return match ? `/category/${match.slug}` : ROUTES.DEALS;
+}
+
+type QuickCategory = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+};
+
+function buildQuickCategories(categories: NavCategory[]): QuickCategory[] {
+  return [
+    { label: "Books", href: categoryHref(categories, "study", "book", "academic"), icon: BookOpen },
+    { label: "Stationery", href: categoryHref(categories, "stationery"), icon: PenLine },
+    { label: "School Courses", href: ROUTES.BUY_COURSE, icon: GraduationCap },
+    { label: "Other Items", href: categoryHref(categories, "other"), icon: Package },
+    { label: "Deals & Offers", href: ROUTES.DEALS, icon: Sparkles },
+    { label: "Upload List", href: ROUTES.UPLOAD_LIST, icon: Upload },
+  ];
+}
+
+function ProductCard({
+  imageUrl,
+  title,
+  price,
+  badge,
+  productId,
+  fromPath,
+  strikethroughPrice,
+}: {
+  imageUrl?: string | null;
+  title: string;
+  price: number;
+  badge?: string;
+  productId: string;
+  fromPath: string;
+  strikethroughPrice?: number;
+}) {
+  return (
+    <Card variant="interactive" className="overflow-hidden rounded-2xl border-[#E8DEC8] bg-white shadow-[0_8px_24px_-8px_rgba(7,29,54,0.08)]">
+      {imageUrl ? (
+        <img src={imageUrl} alt={title} className="w-full aspect-[4/3] object-cover" />
+      ) : (
+        <div className="w-full aspect-[4/3] bg-[#DDE8D8]/50 flex items-center justify-center">
+          <BookOpen className="h-10 w-10 text-[#5F7F64]/60" />
+        </div>
+      )}
+      <CardContent className="p-5 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-semibold text-[#071D36] text-base line-clamp-2">{title}</h3>
+          {badge ? (
+            <span className="shrink-0 rounded-full bg-[#DDE8D8] text-[#5F7F64] text-xs px-2.5 py-0.5 font-medium">
+              {badge}
+            </span>
+          ) : null}
+        </div>
+        <div className="flex items-center justify-between pt-1">
+          <div>
+            {strikethroughPrice != null ? (
+              <p className="text-xs text-muted-foreground line-through">Rs. {strikethroughPrice}</p>
+            ) : null}
+            <p className="text-sm text-price">Rs. {price}</p>
+          </div>
+          <Button asChild size="sm" variant="hero" className="rounded-full px-4">
+            <Link to={`/product/${productId}`} state={{ from: fromPath }}>
+              View
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 const HomePage = () => {
@@ -78,11 +182,9 @@ const HomePage = () => {
   useEffect(() => {
     if (banners.length <= 1) return;
     if (isBannerHovered) return;
-
     const id = window.setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, 3000);
-
+    }, 5000);
     return () => window.clearInterval(id);
   }, [banners.length, isBannerHovered]);
 
@@ -96,13 +198,12 @@ const HomePage = () => {
     setCurrentIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
   };
 
-  // Fetch blog posts using React Query (only latest 3 for homepage)
   const { data: blogPostsResponse, isLoading: isLoadingBlog } = useQuery({
     queryKey: ["publishedBlogPosts", "home"],
     queryFn: async () => {
       const response = await getPublishedBlogPosts();
       if (!response.success) return [];
-      return response.data.slice(0, 3); // Only show latest 3 on homepage
+      return response.data.slice(0, 3);
     },
   });
 
@@ -155,592 +256,524 @@ const HomePage = () => {
     },
   });
 
-  const {
-    data: navCategoriesResponse = [],
-  } = useQuery({
+  const { data: navCategoriesResponse = [] } = useQuery({
     queryKey: ["homeNavCategories"],
     queryFn: async () => {
       const res = await getNavCategories();
       if (!res.success) return [] as NavCategory[];
-      return res.data.filter(
-        (c) => c.slug !== "home" && c.slug !== "track-order"
-      );
+      return res.data.filter((c) => c.slug !== "home" && c.slug !== "track-order");
     },
   });
 
   const navCategories = navCategoriesResponse as NavCategory[];
+  const quickCategories = useMemo(() => buildQuickCategories(navCategories), [navCategories]);
+  const popularCategories = navCategories.slice(0, 4);
 
-  useEffect(() => {
-    if (navCategories.length <= 1) return;
-    const id = window.setInterval(() => {
-      const container = document.querySelector<HTMLDivElement>("#home-category-scroll");
-      if (!container) return;
-      const cardWidth = 260;
-      const maxScrollLeft = container.scrollWidth - container.clientWidth;
-      const nextLeft = container.scrollLeft + cardWidth;
-      if (nextLeft >= maxScrollLeft) {
-        container.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        container.scrollBy({ left: cardWidth, behavior: "smooth" });
-      }
-    }, 3500);
-    return () => window.clearInterval(id);
-  }, [navCategories.length]);
+  const heroTitle = currentBanner?.title?.trim();
+  const heroSubtitle =
+    currentBanner?.subtitle?.trim() ||
+    "Premium books, stationery, and complete school courses — curated for every learner.";
+  const shopHref =
+    currentBanner?.button_link?.trim() || ROUTES.DEALS;
+  const shopLabel = currentBanner?.button_text?.trim() || "Shop Now";
+
+  const renderHeroBannerVisual = (className?: string) => {
+    const imageUrl = currentBanner?.image_url;
+    const videoUrl = currentBanner?.video_url;
+    const mediaClass = cn(
+      "h-full w-full object-cover transition-opacity duration-500",
+      isFading ? "opacity-80" : "opacity-100",
+      className
+    );
+
+    if (videoUrl) {
+      return (
+        <video
+          className={mediaClass}
+          src={videoUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+      );
+    }
+
+    if (imageUrl) {
+      return <img src={imageUrl} alt="" className={mediaClass} />;
+    }
+
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#DDE8D8]/40">
+        <BookOpen className="h-16 w-16 text-[#5F7F64]/50" />
+      </div>
+    );
+  };
 
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
+    <div className="home-page flex flex-col">
+      {/* —— Hero —— */}
       <section
-        className="relative overflow-hidden min-h-[70vh] flex items-stretch"
+        className="pt-6 pb-4 md:pt-8 md:pb-6"
         onMouseEnter={() => setIsBannerHovered(true)}
         onMouseLeave={() => setIsBannerHovered(false)}
       >
-        {/* Background (image or video) */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
-            isFading ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          {currentBanner?.video_url ? (
-            <video
-              className="absolute inset-0 h-full w-full object-cover"
-              src={currentBanner.video_url}
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
-          ) : (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: currentBanner?.image_url ? `url(${currentBanner.image_url})` : undefined,
-              }}
-            />
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="absolute inset-0 z-20">
-          <div className="container relative h-full">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-3 md:left-0 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full text-primary-foreground bg-black/20 hover:bg-black/35 backdrop-blur border border-white/10"
-              onClick={goPrevBanner}
-              aria-label="Previous banner"
-              type="button"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-3 md:right-0 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full text-primary-foreground bg-black/20 hover:bg-black/35 backdrop-blur border border-white/10"
-              onClick={goNextBanner}
-              aria-label="Next banner"
-              type="button"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="container relative flex-1 flex items-center py-16 md:py-24">
-          <div className="max-w-2xl space-y-6 animate-slide-up">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight">
-              {currentBanner?.title ?? (
-                <>
-                   <span className="text-accent"></span> 
-                </>
-              )}
-            </h1>
-            <p className="text-lg md:text-xl text-primary-foreground/90">
-              {currentBanner?.subtitle ??
-                ""}
-            </p>
-
-            <div className="flex flex-wrap gap-4 pt-4">
-              {currentBanner?.button_text && currentBanner?.button_link ? (
-                <Button asChild size="xl" variant="hero-outline">
-                  <Link to={currentBanner.button_link}>{currentBanner.button_text}</Link>
-                </Button>
-              ) : null}
-            </div>
-
-            {banners.length > 1 && (
-              <div className="flex items-center gap-2 pt-4">
-                {banners.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setCurrentIndex(i)}
-                    className={`h-2.5 w-2.5 rounded-full transition-colors ${
-                      i === currentIndex ? "bg-accent" : "bg-primary-foreground/30 hover:bg-primary-foreground/50"
-                    }`}
-                    aria-label={`Go to banner ${i + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* New Deals */}
-      <section className="py-16 md:py-24 bg-secondary/20">
-        <div className="container">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-2">
-                <Sparkles className="h-7 w-7 text-accent" />
-                New Deals
-              </h2>
-              <p className="text-muted-foreground">Latest offers on selected books.</p>
-            </div>
-            <Button asChild variant="outline" className="hidden md:flex">
-              <Link to="/deals">View All</Link>
-            </Button>
-          </div>
-
-          {isLoadingDeals ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                  <CardContent className="p-5 space-y-3">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-8 w-32" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {newDeals.map((deal) => (
-                <Card
-                  key={deal.id}
-                  variant="interactive"
-                  className="overflow-hidden card-shadow-hover hover:border-accent/60 transition-colors"
-                >
-                  {deal.book_image_url ? (
-                    <img
-                      src={deal.book_image_url}
-                      alt={deal.book_title}
-                      className="w-full aspect-[4/3] object-cover"
-                    />
-                  ) : (
-                    <div className="w-full aspect-[4/3] bg-secondary/50 flex items-center justify-center">
-                      <BookOpen className="h-10 w-10 text-muted-foreground/70" />
-                    </div>
-                  )}
-                  <CardContent className="p-5 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-semibold text-base line-clamp-2">{deal.book_title}</h3>
-                      {deal.badge ? (
-                        <span className="inline-flex items-center rounded-full bg-accent/10 text-accent text-xs px-3 py-1 whitespace-nowrap">
-                          {deal.badge}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground line-through">Rs. {deal.original_price}</p>
-                        <p className="text-sm text-yellow-400 font-semibold">Rs. {deal.deal_price}</p>
-                      </div>
-                      <Button asChild size="sm" className="gold-gradient rounded-full px-4 py-1.5 text-xs">
-                        <Link to={`/product/${deal.book_id}`} state={{ from: location.pathname }}>View</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 text-center md:hidden">
-            <Button asChild variant="outline">
-              <Link to="/deals">View All</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Trending Books */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-2">
-                <Flame className="h-7 w-7 text-accent" />
-                Trending Books
-              </h2>
-              <p className="text-muted-foreground">Popular picks parents are ordering right now.</p>
-            </div>
-            <Button asChild variant="outline" className="hidden md:flex">
-              <Link to="/trending">View All</Link>
-            </Button>
-          </div>
-
-          {isLoadingTrending ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                  <CardContent className="p-5 space-y-3">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-8 w-32" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {trendingBooks.map((b) => (
-                <Card key={b.id} variant="interactive" className="overflow-hidden card-shadow-hover hover:border-accent/60 transition-colors">
-                  {b.image_url ? (
-                    <img src={b.image_url} alt={b.title} className="w-full aspect-[4/3] object-cover" />
-                  ) : (
-                    <div className="w-full aspect-[4/3] bg-secondary/50 flex items-center justify-center">
-                      <BookOpen className="h-10 w-10 text-muted-foreground/70" />
-                    </div>
-                  )}
-                  <CardContent className="p-5 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-semibold text-base line-clamp-2">{b.title}</h3>
-                      <span className="inline-flex items-center rounded-full bg-accent/10 text-accent text-xs px-3 py-1 whitespace-nowrap">
-                        Trending
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <p className="text-sm text-yellow-400 font-semibold">Rs. {b.price}</p>
-                      <Button asChild size="sm" className="gold-gradient rounded-full px-4 py-1.5 text-xs">
-                        <Link to={`/product/${b.id}`} state={{ from: location.pathname }}>View</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 text-center md:hidden">
-            <Button asChild variant="outline">
-              <Link to="/trending">View All</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Best Sellers */}
-      <section className="py-16 md:py-24 bg-secondary/20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-2">
-                <BadgeDollarSign className="h-7 w-7 text-accent" />
-                Best Sellers
-              </h2>
-              <p className="text-muted-foreground">Most purchased books and bundles on offer.</p>
-            </div>
-            <Button asChild variant="outline" className="hidden md:flex">
-              <Link to="/best-sellers">View All</Link>
-            </Button>
-          </div>
-
-          {isLoadingBestSellers ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                  <CardContent className="p-5 space-y-3">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-8 w-32" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {bestSellers.map((b) => (
-                <Card key={b.id} variant="interactive" className="overflow-hidden card-shadow-hover hover:border-accent/60 transition-colors">
-                  {b.image_url ? (
-                    <img src={b.image_url} alt={b.title} className="w-full aspect-[4/3] object-cover" />
-                  ) : (
-                    <div className="w-full aspect-[4/3] bg-secondary/50 flex items-center justify-center">
-                      <BookOpen className="h-10 w-10 text-muted-foreground/70" />
-                    </div>
-                  )}
-                  <CardContent className="p-5 space-y-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-semibold text-base line-clamp-2">{b.title}</h3>
-                      <span className="inline-flex items-center rounded-full bg-accent/10 text-accent text-xs px-3 py-1 whitespace-nowrap">
-                        Best Seller
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <p className="text-sm text-yellow-400 font-semibold">Rs. {b.price}</p>
-                      <Button asChild size="sm" className="gold-gradient rounded-full px-4 py-1.5 text-xs">
-                        <Link to={`/product/${b.id}`} state={{ from: location.pathname }}>View</Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-8 text-center md:hidden">
-            <Button asChild variant="outline">
-              <Link to="/best-sellers">View All</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Customer Testimonials */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Customer Testimonials</h2>
-            <p className="text-muted-foreground">What our customers say about us</p>
-          </div>
-          <TestimonialSlider reviews={storeReviews} />
-          <div className="mt-8 text-center">
-            <Button asChild variant="outline">
-              <Link to="/reviews">Write a Review</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Action Cards */}
-      {/* Categories */}
-      <section className="py-16 bg-secondary/30">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
-            <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Browse Categories</h2>
-              <p className="text-muted-foreground">
-                Explore our full catalog of books, stationery, and educational materials.
-              </p>
-            </div>
-            {navCategories.length > 0 && (
-              <div className="hidden md:flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={() => {
-                    const container = document.querySelector<HTMLDivElement>("#home-category-scroll");
-                    if (!container) return;
-                    const cardWidth = 260;
-                    container.scrollBy({ left: -cardWidth, behavior: "smooth" });
-                  }}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full"
-                  onClick={() => {
-                    const container = document.querySelector<HTMLDivElement>("#home-category-scroll");
-                    if (!container) return;
-                    const cardWidth = 260;
-                    container.scrollBy({ left: cardWidth, behavior: "smooth" });
-                  }}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="relative">
-            <div className="overflow-hidden">
-              <div
-                id="home-category-scroll"
-                className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth"
-              >
-                {navCategories.map((category) => (
-                  <Link
-                    key={category.id}
-                    to={`/category/${category.slug}`}
-                    className="min-w-[220px] max-w-[260px]"
-                  >
-                    <Card variant="interactive" className="h-full">
-                      <CardContent className="p-5 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="font-semibold text-base line-clamp-2">
-                            {category.name}
-                          </h3>
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs">
-                            <ArrowRight className="h-3 w-3" />
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          Discover books and stationery in {category.name}.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-                {navCategories.length === 0 && (
-                  <div className="flex gap-4">
-                    {[...Array(4)].map((_, i) => (
-                      <Card key={i} className="min-w-[220px] max-w-[260px]">
-                        <CardContent className="p-5 space-y-3">
-                          <Skeleton className="h-4 w-1/2" />
-                          <Skeleton className="h-3 w-full" />
-                          <Skeleton className="h-3 w-3/4" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Features */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div 
-                key={feature.title} 
-                className="text-center space-y-4"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
-                  <feature.icon className="h-8 w-8 text-primary" />
+        <div className="container max-w-[1400px]">
+          <div className="home-hero-card relative overflow-hidden rounded-3xl border border-[#E8DEC8]">
+            <div className="relative z-10 grid min-h-[360px] md:min-h-[400px] grid-cols-1 items-center gap-6 px-5 py-8 md:px-8 md:py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1.35fr)_minmax(0,0.85fr)] lg:gap-8">
+              {/* Left — single banner panel */}
+              <div className="order-2 lg:order-1 hidden md:block">
+                <div className="relative mx-auto w-full max-w-[300px] lg:max-w-none h-[200px] md:h-[280px] lg:h-[320px] rounded-2xl overflow-hidden border border-[#E8DEC8] bg-[#DDE8D8]/25 shadow-sm">
+                  {renderHeroBannerVisual()}
                 </div>
-                <h3 className="text-xl font-semibold">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+              </div>
+
+              {/* Center — headline & CTAs */}
+              <div className="order-1 lg:order-2 flex flex-col items-center justify-center text-center px-1 lg:px-4">
+                <div className="w-full max-w-[720px]">
+                  <span className="inline-flex items-center rounded-full border border-[#E8DEC8] bg-white/80 px-4 py-1.5 text-xs font-medium text-[#5F7F64] mb-4">
+                    Your Trusted Learning Partner
+                  </span>
+
+                  {heroTitle ? (
+                    <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#071D36] leading-[1.15] tracking-tight">
+                      {heroTitle}
+                    </h1>
+                  ) : (
+                    <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#071D36] leading-[1.15] tracking-tight">
+                      Everything You Need for Learning &{" "}
+                      <span className="home-serif-accent">Growth</span>
+                    </h1>
+                  )}
+
+                  <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-[680px] mx-auto leading-relaxed">
+                    {heroSubtitle}
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <Button asChild size="lg" variant="hero" className="rounded-full px-8 gap-2">
+                      <Link to={shopHref}>
+                        {shopLabel}
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="hero-outline" className="rounded-full px-8 gap-2 bg-white">
+                      <Link to={ROUTES.UPLOAD_LIST}>
+                        <Upload className="h-4 w-4" />
+                        Upload Your List
+                      </Link>
+                    </Button>
+                  </div>
+
+                  {banners.length > 1 && (
+                    <div className="mt-6 flex items-center justify-center gap-2">
+                      {banners.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setCurrentIndex(i)}
+                          className={cn(
+                            "h-2 rounded-full transition-all",
+                            i === currentIndex ? "w-8 bg-[#5F7F64]" : "w-2 bg-[#E8DEC8] hover:bg-[#5F7F64]/40"
+                          )}
+                          aria-label={`Go to banner ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right — benefit cards only (no banner image) */}
+              <div className="order-3 hidden lg:flex flex-col justify-center gap-3">
+                {HERO_BENEFITS.map((b) => (
+                  <div
+                    key={b.title}
+                    className="flex items-center gap-3 rounded-2xl border border-[#E8DEC8] bg-white px-4 py-3 shadow-[0_8px_24px_-8px_rgba(7,29,54,0.08)]"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#DDE8D8] text-[#5F7F64]">
+                      <b.icon className="h-5 w-5" />
+                    </span>
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-semibold text-[#071D36]">{b.title}</p>
+                      <p className="text-xs text-muted-foreground">{b.subtitle}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Slider arrows */}
+            {banners.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={goPrevBanner}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#E8DEC8] bg-white/90 text-[#071D36] shadow-sm hover:bg-white"
+                  aria-label="Previous banner"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={goNextBanner}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[#E8DEC8] bg-white/90 text-[#071D36] shadow-sm hover:bg-white"
+                  aria-label="Next banner"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile benefits row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 xl:hidden">
+            {HERO_BENEFITS.map((b) => (
+              <div
+                key={b.title}
+                className="flex items-center gap-3 rounded-2xl border border-[#E8DEC8] bg-white px-4 py-3 shadow-[0_8px_24px_-8px_rgba(7,29,54,0.08)]"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#DDE8D8] text-[#5F7F64]">
+                  <b.icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-[#071D36]">{b.title}</p>
+                  <p className="text-xs text-muted-foreground">{b.subtitle}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Limited Time Deals Banner */}
-      <section className="py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl hero-gradient card-shadow text-primary-foreground px-6 py-10 md:px-10 md:py-14 flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-1 space-y-3 md:space-y-4">
-              <p className="uppercase tracking-[0.2em] text-xs md:text-sm text-accent-foreground/80">
-                Limited Time Offer
-              </p>
-              <h2 className="text-3xl md:text-4xl font-bold">
-                Get up to <span className="text-accent">20% discount</span> on selected school courses
-              </h2>
-              <p className="text-sm md:text-base text-primary-foreground/90 max-w-xl">
-                Perfect time to complete your child&apos;s school course with premium books and stationery from Umar Kitab Ghar.
-              </p>
+      {/* —— Quick category strip —— */}
+      <section className="pb-6">
+        <div className="container max-w-[1400px]">
+          <div className="home-quick-strip rounded-2xl border border-[#E8DEC8]/80 px-3 py-4 md:px-6 md:py-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-2">
+              {quickCategories.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className="group flex flex-col items-center text-center gap-2 rounded-xl p-2 hover:bg-white/50 transition-colors"
+                >
+                  <span className="flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full border-2 border-white bg-white shadow-sm text-[#5F7F64] group-hover:border-[#C9A44C]/40">
+                    <item.icon className="h-6 w-6 md:h-7 md:w-7" />
+                  </span>
+                  <span className="text-sm font-semibold text-[#071D36]">{item.label}</span>
+                  <span className="text-xs text-[#5F7F64] group-hover:underline">Explore Now</span>
+                </Link>
+              ))}
             </div>
-            <div className="flex flex-col items-stretch gap-3 w-full md:w-auto">
-              <Button
-                asChild
-                className="gold-gradient rounded-full px-8 py-3 text-sm md:text-base"
+          </div>
+        </div>
+      </section>
+
+      {/* —— Feature strip —— */}
+      <section className="pb-8">
+        <div className="container max-w-[1400px]">
+          <div className="rounded-2xl border border-[#E8DEC8] bg-white/70 divide-y sm:divide-y-0 sm:divide-x divide-[#E8DEC8] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURE_STRIP.map((item, i) => (
+              <div
+                key={item.label}
+                className={cn(
+                  "flex items-center justify-center gap-3 px-4 py-4 text-center sm:text-left",
+                  i > 0 && "sm:border-l sm:border-[#E8DEC8]"
+                )}
               >
-                <Link to={ROUTES.BUY_COURSE}>Shop Now</Link>
-              </Button>
-              <span className="text-xs md:text-sm text-primary-foreground/80 text-center">
-                Hurry! Offer valid for a limited time only.
-              </span>
-            </div>
+                <item.icon className="h-5 w-5 shrink-0 text-[#5F7F64]" />
+                <span className="text-sm font-medium text-[#071D36]">{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* SEO Content Section */}
-      <section className="py-16 bg-secondary/30">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Welcome to Umar Kitab Ghar - Your Premier Educational Store
-            </h2>
-            <p className="text-muted-foreground leading-relaxed text-lg">
-              Umar Kitab Ghar is Pakistan's trusted destination for school books, stationery, and educational 
-              supplies. We offer complete course packages from Nursery to Class 10 for all major schools, 
-              ensuring your child has the right materials for academic success. Our extensive collection 
-              includes textbooks, notebooks, art supplies, Islamic literature, novels, and all essential 
-              stationery items. With options for both store pickup and home delivery, shopping for 
-              educational materials has never been easier. Quality products, competitive prices, and 
-              excellent customer service - that's the Umar Kitab Ghar promise.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Blog Section */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
+      {/* —— Popular Categories + Special Offer —— */}
+      <section className="pb-10 md:pb-12">
+        <div className="container max-w-[1400px]">
+          <div className="grid lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_320px] gap-6 lg:gap-8">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">From Our Blog</h2>
-              <p className="text-muted-foreground">Tips, guides, and educational insights</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#071D36] mb-6 font-serif tracking-tight">
+                Popular Categories
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+                {(popularCategories.length > 0 ? popularCategories : quickCategories.slice(0, 4)).map(
+                  (cat) => {
+                    const isNav = "slug" in cat;
+                    const href = isNav ? `/category/${(cat as NavCategory).slug}` : (cat as QuickCategory).href;
+                    const name = isNav ? (cat as NavCategory).name : (cat as QuickCategory).label;
+                    const Icon = isNav ? BookOpen : (cat as QuickCategory).icon;
+                    const dealImage = newDeals[0]?.book_image_url;
+
+                    return (
+                      <Link key={name + href} to={href} className="group">
+                        <Card className="h-full rounded-2xl border-[#E8DEC8] bg-white overflow-hidden shadow-[0_8px_24px_-8px_rgba(7,29,54,0.08)] hover:shadow-[0_16px_40px_-12px_rgba(7,29,54,0.12)] transition-all hover:-translate-y-0.5">
+                          <CardContent className="p-5 flex gap-4">
+                            <div className="shrink-0">
+                              {isNav && dealImage ? (
+                                <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-[#E8DEC8]">
+                                  <img src={dealImage} alt="" className="h-full w-full object-cover" />
+                                </div>
+                              ) : (
+                                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-[#DDE8D8] text-[#5F7F64]">
+                                  <Icon className="h-8 w-8" />
+                                </span>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex flex-col justify-center">
+                              <h3 className="font-semibold text-[#071D36] text-lg mb-1">{name}</h3>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                                Explore quality {name.toLowerCase()} for every need.
+                              </p>
+                              <span className="text-sm font-medium text-[#5F7F64] group-hover:text-[#071D36] inline-flex items-center gap-1">
+                                Shop Now <ArrowRight className="h-3.5 w-3.5" />
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    );
+                  }
+                )}
+              </div>
             </div>
-            <Button asChild variant="outline" className="hidden md:flex">
-              <Link to={ROUTES.BLOG}>View All Posts</Link>
+
+            <div className="lg:pt-12">
+              <Card className="h-full min-h-[280px] rounded-3xl border-[#E8DEC8] bg-[#FFFDF8] shadow-[0_8px_24px_-8px_rgba(7,29,54,0.08)] overflow-hidden">
+                <CardContent className="p-6 md:p-8 flex flex-col justify-between h-full relative">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#DDE8D8]/50 rounded-full blur-2xl -mr-8 -mt-8" />
+                  <div className="relative space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-[#5F7F64]">Special Offer</p>
+                    <h3 className="text-3xl font-bold text-[#071D36] leading-tight">
+                      Up to <span className="text-[#C9A44C]">20% OFF</span>
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Selected school courses and bundle deals for a limited time.
+                    </p>
+                  </div>
+                  <Button asChild variant="hero" className="relative mt-6 rounded-full w-full sm:w-auto gap-2">
+                    <Link to={ROUTES.DEALS}>
+                      Shop The Deal
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* —— New Deals —— */}
+      <section className="py-10 md:py-12">
+        <div className="container max-w-[1400px]">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#071D36] flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-[#C9A44C]" />
+                New Deals
+              </h2>
+              <p className="text-muted-foreground text-sm mt-1">Latest offers on selected books.</p>
+            </div>
+            <Button asChild variant="outline" className="hidden md:flex rounded-full border-[#E8DEC8]">
+              <Link to="/deals">View All</Link>
             </Button>
           </div>
 
-          {/* Loading State */}
-          {isLoadingBlog && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i} variant="interactive" className="h-full">
-                  <CardContent className="p-6 space-y-4">
-                    <Skeleton className="h-5 w-24" />
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
+          {isLoadingDeals ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="rounded-2xl overflow-hidden">
+                  <Skeleton className="aspect-[4/3] w-full" />
+                  <CardContent className="p-5 space-y-3">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-8 w-24" />
                   </CardContent>
                 </Card>
               ))}
             </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {newDeals.map((deal) => (
+                <ProductCard
+                  key={deal.id}
+                  imageUrl={deal.book_image_url}
+                  title={deal.book_title}
+                  price={deal.deal_price}
+                  strikethroughPrice={deal.original_price}
+                  badge={deal.badge ?? undefined}
+                  productId={deal.book_id}
+                  fromPath={location.pathname}
+                />
+              ))}
+            </div>
           )}
 
-          {/* Blog Posts List */}
-          {!isLoadingBlog && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blogPosts.map((post, index) => (
+          <div className="mt-6 text-center md:hidden">
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/deals">View All</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* —— Trending —— */}
+      <section className="py-10 md:py-12 bg-[#DDE8D8]/25">
+        <div className="container max-w-[1400px]">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#071D36] flex items-center gap-2">
+                <Flame className="h-6 w-6 text-[#C9A44C]" />
+                Trending Books
+              </h2>
+              <p className="text-muted-foreground text-sm mt-1">Popular picks right now.</p>
+            </div>
+            <Button asChild variant="outline" className="hidden md:flex rounded-full">
+              <Link to="/trending">View All</Link>
+            </Button>
+          </div>
+
+          {isLoadingTrending ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {trendingBooks.map((b) => (
+                <ProductCard
+                  key={b.id}
+                  imageUrl={b.image_url}
+                  title={b.title}
+                  price={b.price}
+                  badge="Trending"
+                  productId={b.id}
+                  fromPath={location.pathname}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="mt-6 text-center md:hidden">
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/trending">View All</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* —— Best Sellers —— */}
+      <section className="py-10 md:py-12">
+        <div className="container max-w-[1400px]">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#071D36] flex items-center gap-2">
+                <BadgeDollarSign className="h-6 w-6 text-[#C9A44C]" />
+                Best Sellers
+              </h2>
+              <p className="text-muted-foreground text-sm mt-1">Most purchased on offer.</p>
+            </div>
+            <Button asChild variant="outline" className="hidden md:flex rounded-full">
+              <Link to="/best-sellers">View All</Link>
+            </Button>
+          </div>
+
+          {isLoadingBestSellers ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {bestSellers.map((b) => (
+                <ProductCard
+                  key={b.id}
+                  imageUrl={b.image_url}
+                  title={b.title}
+                  price={b.price}
+                  badge="Best Seller"
+                  productId={b.id}
+                  fromPath={location.pathname}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="mt-6 text-center md:hidden">
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/best-sellers">View All</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* —— Testimonials —— */}
+      <section className="py-10 md:py-12 bg-white/50">
+        <div className="container max-w-[1400px]">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#071D36]">Customer Testimonials</h2>
+            <p className="text-muted-foreground text-sm mt-1">What our customers say about us</p>
+          </div>
+          <TestimonialSlider reviews={storeReviews} />
+          <div className="mt-6 text-center">
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/reviews">Write a Review</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* —— Blog —— */}
+      <section className="py-10 md:py-12">
+        <div className="container max-w-[1400px]">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#071D36]">From Our Blog</h2>
+              <p className="text-muted-foreground text-sm mt-1">Tips, guides, and educational insights</p>
+            </div>
+            <Button asChild variant="outline" className="hidden md:flex rounded-full">
+              <Link to={ROUTES.BLOG}>View All Posts</Link>
+            </Button>
+          </div>
+
+          {isLoadingBlog ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="rounded-2xl">
+                  <CardContent className="p-6 space-y-4">
+                    <Skeleton className="h-40 w-full rounded-xl" />
+                    <Skeleton className="h-6 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {blogPosts.map((post) => (
                 <Link key={post.id} to={`/blog/${post.slug}`}>
-                  <Card 
-                    variant="interactive" 
-                    className="h-full"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <CardContent className="p-6 space-y-4">
+                  <Card className="h-full rounded-2xl border-[#E8DEC8] bg-white hover:-translate-y-0.5 transition-transform">
+                    <CardContent className="p-5 space-y-4">
                       {post.image_url ? (
                         <img
                           src={post.image_url}
                           alt={post.title}
-                          className="w-full aspect-video object-cover rounded-lg border border-border"
+                          className="w-full aspect-video object-cover rounded-xl border border-[#E8DEC8]"
                         />
                       ) : (
-                        <div className="w-full aspect-video rounded-lg border border-border bg-secondary/30 flex items-center justify-center">
-                          <FileText className="h-10 w-10 text-muted-foreground/70" />
+                        <div className="w-full aspect-video rounded-xl border border-[#E8DEC8] bg-[#DDE8D8]/30 flex items-center justify-center">
+                          <FileText className="h-10 w-10 text-[#5F7F64]/50" />
                         </div>
                       )}
-                      <h3 className="text-lg font-semibold line-clamp-2">{post.title}</h3>
+                      <h3 className="text-lg font-semibold text-[#071D36] line-clamp-2">{post.title}</h3>
                       <p className="text-muted-foreground text-sm line-clamp-3">
                         {previewText(post.content, 120)}
                       </p>
-                      <Button size="sm" variant="outline" className="w-fit border-accent/50 text-accent hover:bg-accent/10">
-                        Read More <ArrowRight className="h-4 w-4 ml-1" />
-                      </Button>
+                      <span className="text-sm font-medium text-[#5F7F64] inline-flex items-center gap-1">
+                        Read More <ArrowRight className="h-4 w-4" />
+                      </span>
                     </CardContent>
                   </Card>
                 </Link>
@@ -748,10 +781,36 @@ const HomePage = () => {
             </div>
           )}
 
-          <div className="mt-8 text-center md:hidden">
-            <Button asChild variant="outline">
+          <div className="mt-6 text-center md:hidden">
+            <Button asChild variant="outline" className="rounded-full">
               <Link to={ROUTES.BLOG}>View All Posts</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* —— Trust strip —— */}
+      <section className="pb-12 md:pb-14">
+        <div className="container max-w-[1400px]">
+          <div className="rounded-2xl border border-[#E8DEC8] bg-white px-4 py-6 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {TRUST_STRIP.map((item) => (
+              <div key={item.title} className="flex items-start gap-4 text-center sm:text-left justify-center sm:justify-start">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#DDE8D8] text-[#5F7F64] mx-auto sm:mx-0">
+                  <item.icon className="h-6 w-6" />
+                </span>
+                <div>
+                  <p className="font-semibold text-[#071D36] text-sm">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</p>
+                  {item.title === "Happy Customers" && (
+                    <div className="flex items-center gap-1 mt-1 justify-center sm:justify-start">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} className="h-3.5 w-3.5 fill-[#C9A44C] text-[#C9A44C]" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -429,7 +429,7 @@ const BuyCoursePage = () => {
                     if (file) void handleBookListUpload(file);
                     e.target.value = "";
                   }}
-                  className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-accent file:text-accent-foreground hover:file:bg-accent/90"
+                  className="upload-zone block w-full text-sm file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:bg-[#071D36] file:text-white hover:file:bg-[#071D36]/90 cursor-pointer"
                 />
                 {bookListFileUrl ? (
                   <a
@@ -509,7 +509,7 @@ const BuyCoursePage = () => {
               </div>
 
               <div className="md:col-span-1">
-                <Card variant="elevated" className="sticky top-24">
+                <Card variant="elevated" className="page-card-ivory sticky top-24">
                   <CardContent className="p-6 space-y-4">
                     <h3 className="text-lg font-semibold">Order Summary</h3>
 
@@ -596,8 +596,8 @@ const BuyCoursePage = () => {
   };
 
   return (
-    <div className="py-8 md:py-12">
-      <div className="container">
+    <div className="page-section">
+      <div className="container max-w-4xl">
         <div className="flex items-center justify-center gap-2 mb-8">
           {[COURSE_STEPS.SCHOOL, COURSE_STEPS.CLASS, COURSE_STEPS.COURSE].map((s, index) => {
             const stepIndex = [COURSE_STEPS.SCHOOL, COURSE_STEPS.CLASS, COURSE_STEPS.COURSE].indexOf(step);

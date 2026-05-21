@@ -73,7 +73,7 @@ export function TestimonialSlider({ reviews }: { reviews: Review[] }) {
             <div key={idx} className="w-full shrink-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {group.map((review) => (
-                  <Card key={review.id} className="bg-white rounded-xl shadow-md h-full">
+                  <Card key={review.id} className="h-full shadow-soft">
                     <CardContent className="p-6 space-y-3 h-full flex flex-col">
                       <div className="flex items-center gap-1">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -81,7 +81,7 @@ export function TestimonialSlider({ reviews }: { reviews: Review[] }) {
                             key={star}
                             className={`h-4 w-4 ${
                               star <= review.rating
-                                ? "fill-primary text-primary"
+                                ? "fill-accent text-accent"
                                 : "text-muted-foreground/40"
                             }`}
                           />

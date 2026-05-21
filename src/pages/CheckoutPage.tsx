@@ -208,9 +208,9 @@ const CheckoutPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container max-w-2xl">
-          <Card>
+          <Card className="page-card-ivory">
             <CardContent className="p-8 text-center">
               <ShoppingCart className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
               <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
@@ -228,12 +228,12 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-4xl">
         <div className="grid md:grid-cols-3 gap-8">
           {/* Customer Information Form */}
           <div className="md:col-span-2">
-            <Card>
+            <Card className="page-card">
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-6">Customer Information</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -361,7 +361,7 @@ const CheckoutPage = () => {
 
           {/* Order Summary */}
           <div className="md:col-span-1">
-            <Card variant="elevated" className="sticky top-24">
+            <Card variant="elevated" className="page-card-ivory sticky top-24">
               <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold">Order Summary</h3>
 

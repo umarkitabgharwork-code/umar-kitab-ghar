@@ -78,12 +78,12 @@ const WishlistPage = () => {
 
   if (authLoading) {
     return (
-      <div className="py-8 md:py-12">
+      <div className="page-section">
         <div className="container">
           <Skeleton className="h-8 w-48 mb-6" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <Card key={i} variant="elevated">
+              <Card key={i} variant="elevated" className="page-card">
                 <CardContent className="p-4">
                   <Skeleton className="aspect-square w-full mb-4" />
                   <Skeleton className="h-5 w-3/4 mb-2" />
@@ -103,7 +103,7 @@ const WishlistPage = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="page-section">
       <div className="container max-w-4xl">
         <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-2">
           <Heart className="h-8 w-8 text-red-500 fill-red-500" />
@@ -113,7 +113,7 @@ const WishlistPage = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <Card key={i} variant="elevated">
+              <Card key={i} variant="elevated" className="page-card">
                 <CardContent className="p-4">
                   <Skeleton className="aspect-square w-full mb-4" />
                   <Skeleton className="h-5 w-3/4 mb-2" />
@@ -123,7 +123,7 @@ const WishlistPage = () => {
             ))}
           </div>
         ) : items.length === 0 ? (
-          <Card>
+          <Card className="page-card-ivory">
             <CardContent className="p-12 text-center">
               <Heart className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-medium mb-2">Your wishlist is empty</h3>
@@ -144,7 +144,7 @@ const WishlistPage = () => {
               const outOfStock = p.inStock === false;
 
               return (
-                <Card key={item.id} variant="elevated">
+                <Card key={item.id} variant="elevated" className="page-card overflow-hidden">
                   <CardContent className="p-4">
                     <Link
                       to={`/product/${item.book_id}`}
@@ -164,7 +164,7 @@ const WishlistPage = () => {
                     <Link to={`/product/${item.book_id}`} state={{ from: location.pathname }}>
                       <h3 className="font-medium line-clamp-2 hover:underline mb-1">{p.name}</h3>
                     </Link>
-                    <p className="text-lg text-yellow-400 font-semibold mb-4">Rs. {p.price}</p>
+                    <p className="text-lg text-price font-semibold mb-4">Rs. {p.price}</p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
