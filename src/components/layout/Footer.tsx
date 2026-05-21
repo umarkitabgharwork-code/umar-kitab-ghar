@@ -57,7 +57,7 @@ export function Footer() {
             <img
               src={logo}
               alt="Umar Kitab Ghar"
-              className="h-11 w-auto object-contain sm:h-12"
+              className="brand-logo-gold h-12 w-auto object-contain sm:h-14"
               loading="lazy"
             />
           </Link>
@@ -84,7 +84,7 @@ export function Footer() {
                   src={logo}
                   alt=""
                   aria-hidden
-                  className="h-8 w-auto object-contain"
+                  className="brand-logo-gold h-10 w-auto object-contain"
                   loading="lazy"
                 />
               </div>

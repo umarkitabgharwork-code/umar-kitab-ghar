@@ -306,3 +306,10 @@
     transform: scale(1);
   }
 }
+
+/* Brand logo: muted gold #C9A44C — header/footer logo images only */
+@layer utilities {
+  .brand-logo-gold {
+    filter: brightness(0) saturate(100%) invert(64%) sepia(38%) saturate(646%) hue-rotate(8deg) brightness(91%) contrast(92%);
+  }
+}
