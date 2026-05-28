@@ -55,6 +55,59 @@ const HERO_BENEFITS = [
   { icon: Headphones, title: "24/7 Support", subtitle: "We're here to help" },
 ] as const;
 
+const DEFAULT_HERO_TITLE = "Everything You Need for Learning & Growth";
+const DEFAULT_HERO_SUBTITLE =
+  "Premium books, stationery, and complete school courses — curated for every learner.";
+const DEFAULT_HERO_BUTTON_TEXT = "Shop Now";
+const DEFAULT_HERO_BUTTON_LINK = "/category/study-books";
+
+function pickBannerText(
+  banner: Banner | null | undefined,
+  field: keyof Pick<Banner, "title" | "subtitle" | "button_text" | "button_link">,
+): string {
+  if (!banner) return "";
+  const record = banner as Record<string, unknown>;
+  const keys =
+    field === "button_text"
+      ? ["button_text", "buttonText"]
+      : field === "button_link"
+        ? ["button_link", "buttonLink"]
+        : [field];
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+function isExternalUrl(href: string): boolean {
+  return /^https?:\/\//i.test(href);
+}
+
+function HeroPrimaryButton({ href, label }: { href: string; label: string }) {
+  if (isExternalUrl(href)) {
+    return (
+      <Button asChild size="lg" variant="hero" className="rounded-full px-8 gap-2">
+        <a href={href} target="_blank" rel="noreferrer">
+          {label}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+      </Button>
+    );
+  }
+
+  const internalHref = href.startsWith("/") ? href : `/${href}`;
+
+  return (
+    <Button asChild size="lg" variant="hero" className="rounded-full px-8 gap-2">
+      <Link to={internalHref}>
+        {label}
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </Button>
+  );
+}
+
 const TRUST_STRIP = [
   { icon: Shield, title: "100% Original Products", subtitle: "Authentic books & stationery" },
   { icon: Lock, title: "Secure Payments", subtitle: "Safe checkout every time" },
@@ -269,13 +322,25 @@ const HomePage = () => {
   const quickCategories = useMemo(() => buildQuickCategories(navCategories), [navCategories]);
   const popularCategories = navCategories.slice(0, 4);
 
-  const heroTitle = currentBanner?.title?.trim();
-  const heroSubtitle =
-    currentBanner?.subtitle?.trim() ||
-    "Premium books, stationery, and complete school courses — curated for every learner.";
-  const shopHref =
-    currentBanner?.button_link?.trim() || ROUTES.DEALS;
-  const shopLabel = currentBanner?.button_text?.trim() || "Shop Now";
+  const defaultShopLink = useMemo(() => {
+    const fromNav = categoryHref(navCategories, "study", "book", "academic");
+    return fromNav !== ROUTES.DEALS ? fromNav : DEFAULT_HERO_BUTTON_LINK;
+  }, [navCategories]);
+
+  const heroCopy = useMemo(() => {
+    const titleFromBanner = pickBannerText(currentBanner, "title");
+    const subtitleFromBanner = pickBannerText(currentBanner, "subtitle");
+    const buttonTextFromBanner = pickBannerText(currentBanner, "button_text");
+    const buttonLinkFromBanner = pickBannerText(currentBanner, "button_link");
+
+    return {
+      title: titleFromBanner || DEFAULT_HERO_TITLE,
+      subtitle: subtitleFromBanner || DEFAULT_HERO_SUBTITLE,
+      buttonText: buttonTextFromBanner || DEFAULT_HERO_BUTTON_TEXT,
+      buttonLink: buttonLinkFromBanner || defaultShopLink,
+      useDefaultTitle: !titleFromBanner,
+    };
+  }, [currentBanner, defaultShopLink]);
 
   const renderHeroBannerVisual = (className?: string) => {
     const imageUrl = currentBanner?.image_url;
@@ -335,28 +400,23 @@ const HomePage = () => {
                     Your Trusted Learning Partner
                   </span>
 
-                  {heroTitle ? (
-                    <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#071D36] leading-[1.15] tracking-tight">
-                      {heroTitle}
-                    </h1>
-                  ) : (
+                  {heroCopy.useDefaultTitle ? (
                     <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#071D36] leading-[1.15] tracking-tight">
                       Everything You Need for Learning &{" "}
                       <span className="home-serif-accent">Growth</span>
                     </h1>
+                  ) : (
+                    <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#071D36] leading-[1.15] tracking-tight">
+                      {heroCopy.title}
+                    </h1>
                   )}
 
                   <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-[680px] mx-auto leading-relaxed">
-                    {heroSubtitle}
+                    {heroCopy.subtitle}
                   </p>
 
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                    <Button asChild size="lg" variant="hero" className="rounded-full px-8 gap-2">
-                      <Link to={shopHref}>
-                        {shopLabel}
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <HeroPrimaryButton href={heroCopy.buttonLink} label={heroCopy.buttonText} />
                     <Button asChild size="lg" variant="hero-outline" className="rounded-full px-8 gap-2 bg-white">
                       <Link to={ROUTES.UPLOAD_LIST}>
                         <Upload className="h-4 w-4" />
