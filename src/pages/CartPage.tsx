@@ -49,6 +49,13 @@ export default function CartPage() {
                       <div className="text-sm text-muted-foreground mt-1">
                         Price will be confirmed via call or WhatsApp
                       </div>
+                    ) : item.estimatedPriceLabel ? (
+                      <div className="text-sm text-[#5F7F64] mt-1">
+                        Est. {item.estimatedPriceLabel}
+                        <span className="block text-xs text-muted-foreground">
+                          Final confirmation via call/WhatsApp
+                        </span>
+                      </div>
                     ) : (
                       <div className="text-sm text-price">Rs. {item.price}</div>
                     )}
@@ -105,7 +112,11 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-lg font-semibold pt-2 border-t border-[#E8DEC8]">
                   <span>Total</span>
-                  <span className="text-price">Rs. {total}</span>
+                  {items.some((i) => i.estimatedPriceLabel) && total === 0 ? (
+                    <span className="text-sm font-medium text-[#5F7F64]">Confirmed on call</span>
+                  ) : (
+                    <span className="text-price">Rs. {total}</span>
+                  )}
                 </div>
                 <Button asChild variant="hero-outline" className="w-full">
                   <Link to={ROUTES.HOME}>Continue Shopping</Link>

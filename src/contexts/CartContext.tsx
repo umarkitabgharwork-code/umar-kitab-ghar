@@ -24,6 +24,8 @@ export interface CartItem {
   pricePerCourse?: number;
   /** Customer note for flexible course orders */
   courseNote?: string;
+  /** Estimated price range label for special course packages (price may be 0 in cart) */
+  estimatedPriceLabel?: string;
   /** Public URL of uploaded book list (image/PDF) in storage */
   courseBookListUrl?: string | null;
   /** Custom upload-list flow: public file URL */

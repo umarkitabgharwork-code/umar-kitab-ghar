@@ -400,6 +400,14 @@ const PaymentPage = () => {
                           Price will be confirmed via call or WhatsApp
                         </div>
                       </div>
+                    ) : item.estimatedPriceLabel ? (
+                      <div key={item.id} className="text-sm space-y-1">
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-[#5F7F64]">Est. {item.estimatedPriceLabel}</div>
+                        <div className="text-xs text-muted-foreground">
+                          Final confirmation via call/WhatsApp
+                        </div>
+                      </div>
                     ) : (
                       <div key={item.id} className="flex justify-between text-sm">
                         <div className="flex-1">
@@ -428,7 +436,11 @@ const PaymentPage = () => {
                   )}
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
-                    <span>Rs. {total}</span>
+                    {items.some((i) => i.estimatedPriceLabel) && total === 0 ? (
+                      <span className="text-sm font-medium text-[#5F7F64]">Confirmed on call</span>
+                    ) : (
+                      <span>Rs. {total}</span>
+                    )}
                   </div>
                 </div>
               </CardContent>

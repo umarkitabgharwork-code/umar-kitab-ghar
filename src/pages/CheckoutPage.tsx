@@ -436,19 +436,39 @@ const CheckoutPage = () => {
                         </div>
                       </div>
 
-                      <div>
-                        <p className="text-muted-foreground mb-1">Books included:</p>
-                        <ul className="list-disc list-inside space-y-0.5">
-                          {courseItem.books?.map((b) => (
-                            <li key={b.bookId}>{b.title}</li>
-                          ))}
-                        </ul>
-                      </div>
+                      {courseItem.books && courseItem.books.length > 0 ? (
+                        <div>
+                          <p className="text-muted-foreground mb-1">Books included:</p>
+                          <ul className="list-disc list-inside space-y-0.5">
+                            {courseItem.books.map((b) => (
+                              <li key={b.bookId}>{b.title}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      {courseItem.courseNote?.trim() ? (
+                        <div className="rounded-lg border border-[#E8DEC8] bg-[#FBF7EF]/80 p-3">
+                          <p className="text-muted-foreground mb-1 text-xs font-medium">Package details</p>
+                          <p className="whitespace-pre-wrap text-xs text-[#071D36]">{courseItem.courseNote.trim()}</p>
+                        </div>
+                      ) : null}
 
                       <div className="flex justify-between font-semibold">
-                        <span>Total Price</span>
-                        <span>Rs. {courseItem.price * courseItem.quantity}</span>
+                        <span>{courseItem.estimatedPriceLabel ? "Estimated Price" : "Total Price"}</span>
+                        {courseItem.estimatedPriceLabel ? (
+                          <span className="text-right text-sm font-semibold text-[#5F7F64]">
+                            {courseItem.estimatedPriceLabel}
+                          </span>
+                        ) : (
+                          <span>Rs. {courseItem.price * courseItem.quantity}</span>
+                        )}
                       </div>
+                      {courseItem.estimatedPriceLabel ? (
+                        <p className="text-xs text-muted-foreground">
+                          Final confirmation will be done via call/WhatsApp.
+                        </p>
+                      ) : null}
 
                       {customItem && (
                         <div className="border-t pt-3 space-y-2">
@@ -543,7 +563,11 @@ const CheckoutPage = () => {
                   )}
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
-                    <span>Rs. {total}</span>
+                    {items.some((i) => i.estimatedPriceLabel) && total === 0 ? (
+                      <span className="text-sm font-medium text-[#5F7F64]">Confirmed on call</span>
+                    ) : (
+                      <span>Rs. {total}</span>
+                    )}
                   </div>
                   <Button
                     type="button"
