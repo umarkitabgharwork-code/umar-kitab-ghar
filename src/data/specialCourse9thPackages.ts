@@ -1,27 +1,18 @@
-export type BoardId = "sindh" | "federal" | "technical" | "other";
+import type { BoardId, SpecialCoursePackage } from "@/data/specialCourseTypes";
+import {
+  getPackagesForBoard as getPackagesForBoardBase,
+  getGroupsForBoard as getGroupsForBoardBase,
+  getTracksForGroup as getTracksForGroupBase,
+} from "@/data/specialCourseTypes";
 
-export interface SpecialCoursePackage {
-  id: string;
-  boardId: BoardId;
-  boardLabel: string;
-  group: string;
-  track: string;
-  packageName: string;
-  subjects: string[];
-  publishers: string;
-  newPriceRange: string;
-  oldPriceRange: string;
-  note: string;
-}
+export type { BoardId, SpecialCoursePackage } from "@/data/specialCourseTypes";
+export {
+  SPECIAL_COURSE_BOARDS,
+  PRICE_ON_CALL,
+  buildSpecialCourseNote,
+} from "@/data/specialCourseTypes";
 
 export const NINTH_CLASS_LABEL = "9th Course";
-
-export const SPECIAL_COURSE_BOARDS: { id: BoardId; label: string }[] = [
-  { id: "sindh", label: "Sindh Board (STB)" },
-  { id: "federal", label: "Federal Board" },
-  { id: "technical", label: "Technical Board" },
-  { id: "other", label: "Other Board" },
-];
 
 export const NINTH_SPECIAL_PACKAGES: SpecialCoursePackage[] = [
   {
@@ -281,43 +272,14 @@ export const NINTH_SPECIAL_PACKAGES: SpecialCoursePackage[] = [
   },
 ];
 
-export const PRICE_ON_CALL = "Price confirmation on call";
-
-export function getPackagesForBoard(boardId: BoardId): SpecialCoursePackage[] {
-  return NINTH_SPECIAL_PACKAGES.filter((p) => p.boardId === boardId);
+export function getPackagesForBoard(boardId: BoardId) {
+  return getPackagesForBoardBase(NINTH_SPECIAL_PACKAGES, boardId);
 }
 
-export function getGroupsForBoard(boardId: BoardId): string[] {
-  const groups = getPackagesForBoard(boardId).map((p) => p.group);
-  return [...new Set(groups)];
+export function getGroupsForBoard(boardId: BoardId) {
+  return getGroupsForBoardBase(NINTH_SPECIAL_PACKAGES, boardId);
 }
 
-export function getTracksForGroup(boardId: BoardId, group: string): SpecialCoursePackage[] {
-  return getPackagesForBoard(boardId).filter((p) => p.group === group);
-}
-
-export function buildSpecialCourseNote(params: {
-  boardLabel: string;
-  packageName: string;
-  condition: "New Course" | "Old Course";
-  estimatedPrice: string;
-  subjects: string[];
-  publishers: string;
-  extraNote?: string;
-}): string {
-  const lines = [
-    "Special Course Package:",
-    `Class: ${NINTH_CLASS_LABEL}`,
-    `Board: ${params.boardLabel}`,
-    `Package: ${params.packageName}`,
-    `Condition: ${params.condition}`,
-    `Estimated Price: ${params.estimatedPrice}`,
-    `Subjects: ${params.subjects.join(", ")}`,
-    `Publisher: ${params.publishers}`,
-    "Final confirmation will be done via call/WhatsApp.",
-  ];
-  if (params.extraNote?.trim()) {
-    lines.push(`Customer note: ${params.extraNote.trim()}`);
-  }
-  return lines.join("\n");
+export function getTracksForGroup(boardId: BoardId, group: string) {
+  return getTracksForGroupBase(NINTH_SPECIAL_PACKAGES, boardId, group);
 }
