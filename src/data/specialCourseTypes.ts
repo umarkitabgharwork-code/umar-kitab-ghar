@@ -51,7 +51,8 @@ export function buildSpecialCourseNote(params: {
   estimatedPrice: string;
   subjects: string[];
   publishers: string;
-  extraNote?: string;
+  /** Optional customer notes (Additional Notes field or Other Board requirements) */
+  customerNotes?: string;
 }): string {
   const lines = [
     "Special Course Package:",
@@ -62,10 +63,10 @@ export function buildSpecialCourseNote(params: {
     `Estimated Price: ${params.estimatedPrice}`,
     `Subjects: ${params.subjects.join(", ")}`,
     `Publisher: ${params.publishers}`,
-    "Final confirmation will be done via call/WhatsApp.",
   ];
-  if (params.extraNote?.trim()) {
-    lines.push(`Customer note: ${params.extraNote.trim()}`);
+  if (params.customerNotes?.trim()) {
+    lines.push(`Customer Notes: ${params.customerNotes.trim()}`);
   }
+  lines.push("Final confirmation will be done via call/WhatsApp.");
   return lines.join("\n");
 }

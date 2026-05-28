@@ -19,6 +19,34 @@ import {
 
 type CourseCondition = "new" | "old";
 
+const mergeCustomerNotes = (...parts: (string | undefined)[]): string | undefined => {
+  const merged = parts.map((p) => p?.trim()).filter(Boolean).join("\n");
+  return merged || undefined;
+};
+
+const AdditionalNotesField = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) => (
+  <div className="space-y-2">
+    <label htmlFor="additional-notes" className="text-xs font-semibold text-[#071D36]">
+      Additional Notes{" "}
+      <span className="font-normal text-[#5F7F64]">(Optional)</span>
+    </label>
+    <Textarea
+      id="additional-notes"
+      placeholder="Write any special requirement, missing book, medium preference, or instruction..."
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={3}
+      className="rounded-xl border-[#E8DEC8] bg-[#FBF7EF] text-sm text-[#071D36] placeholder:text-[#5F7F64]/60 focus-visible:border-[#5F7F64] focus-visible:ring-[#5F7F64]/30"
+    />
+  </div>
+);
+
 const chipClass =
   "rounded-full border border-[#E8DEC8] bg-[#DDE8D8]/50 px-3 py-1 text-xs font-medium text-[#071D36]";
 
@@ -60,6 +88,8 @@ const SelectionSummary = ({
 const PackageDetailCard = ({
   pkg,
   condition,
+  additionalNotes,
+  onAdditionalNotesChange,
   onConditionChange,
   onAddToCart,
   onProceedToCheckout,
@@ -67,6 +97,8 @@ const PackageDetailCard = ({
 }: {
   pkg: SpecialCoursePackage;
   condition: CourseCondition | null;
+  additionalNotes: string;
+  onAdditionalNotesChange: (value: string) => void;
   onConditionChange: (c: CourseCondition) => void;
   onAddToCart: () => void;
   onProceedToCheckout: () => void;
@@ -144,6 +176,8 @@ const PackageDetailCard = ({
 
         {pkg.note ? <p className="text-xs text-[#5F7F64]">{pkg.note}</p> : null}
 
+        <AdditionalNotesField value={additionalNotes} onChange={onAdditionalNotesChange} />
+
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
           <Button
             type="button"
@@ -196,6 +230,7 @@ const SpecialCoursePackageFlow = ({
   const [selectedPackage, setSelectedPackage] = useState<SpecialCoursePackage | null>(null);
   const [condition, setCondition] = useState<CourseCondition | null>(null);
   const [otherBoardNote, setOtherBoardNote] = useState("");
+  const [additionalNotes, setAdditionalNotes] = useState("");
 
   const boardLabel = SPECIAL_COURSE_BOARDS.find((b) => b.id === boardId)?.label;
   const groups = boardId && boardId !== "other" ? getGroupsForBoard(packages, boardId) : [];
@@ -210,17 +245,20 @@ const SpecialCoursePackageFlow = ({
     setSelectedPackage(null);
     setCondition(null);
     setOtherBoardNote("");
+    setAdditionalNotes("");
   };
 
   const resetFromGroup = () => {
     setSelectedGroup(null);
     setSelectedPackage(null);
     setCondition(null);
+    setAdditionalNotes("");
   };
 
   const resetFromPackage = () => {
     setSelectedPackage(null);
     setCondition(null);
+    setAdditionalNotes("");
   };
 
   const addSpecialPackageToCart = (opts: {
@@ -231,7 +269,7 @@ const SpecialCoursePackageFlow = ({
     newPriceRange: string;
     oldPriceRange: string;
     courseCondition: CourseCondition;
-    extraNote?: string;
+    customerNotes?: string;
     cartIdSuffix: string;
   }) => {
     const conditionLabel = opts.courseCondition === "new" ? "New Course" : "Old Course";
@@ -246,7 +284,7 @@ const SpecialCoursePackageFlow = ({
       estimatedPrice,
       subjects: opts.subjects,
       publishers: opts.publishers,
-      extraNote: opts.extraNote,
+      customerNotes: opts.customerNotes,
     });
 
     addItem({
@@ -277,6 +315,7 @@ const SpecialCoursePackageFlow = ({
       newPriceRange: selectedPackage.newPriceRange,
       oldPriceRange: selectedPackage.oldPriceRange,
       courseCondition: condition,
+      customerNotes: additionalNotes.trim() || undefined,
       cartIdSuffix: selectedPackage.id,
     });
 
@@ -300,7 +339,7 @@ const SpecialCoursePackageFlow = ({
       newPriceRange: PRICE_ON_CALL,
       oldPriceRange: PRICE_ON_CALL,
       courseCondition: condition,
-      extraNote: otherBoardNote.trim() || undefined,
+      customerNotes: mergeCustomerNotes(otherBoardNote, additionalNotes),
       cartIdSuffix: "other",
     });
 
@@ -381,6 +420,8 @@ const SpecialCoursePackageFlow = ({
               Final confirmation will be done via call/WhatsApp.
             </p>
 
+            <AdditionalNotesField value={additionalNotes} onChange={setAdditionalNotes} />
+
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
               <Button
                 type="button"
@@ -427,6 +468,8 @@ const SpecialCoursePackageFlow = ({
         <PackageDetailCard
           pkg={selectedPackage}
           condition={condition}
+          additionalNotes={additionalNotes}
+          onAdditionalNotesChange={setAdditionalNotes}
           onConditionChange={setCondition}
           onAddToCart={() => handleAddPackage(false)}
           onProceedToCheckout={() => handleAddPackage(true)}
