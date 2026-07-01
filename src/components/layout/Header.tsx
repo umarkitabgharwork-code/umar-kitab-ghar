@@ -566,14 +566,31 @@ export function Header() {
               </button>
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden ml-auto shrink-0"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            {/* Mobile cart + hamburger */}
+            <div className="flex items-center gap-0.5 ml-auto shrink-0">
+              <button
+                type="button"
+                onClick={() => navigate("/cart")}
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg text-[#071D36] hover:bg-[#DDE8D8]/50 transition-colors md:hidden"
+                aria-label={`Cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ""}`}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 h-4 min-w-4 px-1 rounded-full bg-[#5F7F64] text-white text-[10px] font-semibold flex items-center justify-center leading-none">
+                    {cartItemCount > 9 ? "9+" : cartItemCount}
+                  </span>
+                )}
+              </button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 lg:hidden"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              >
+                {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -634,6 +651,24 @@ export function Header() {
         <nav className="md:hidden border-t bg-card p-4 animate-fade-in">
           <div className="flex flex-col gap-2">
             {navItems.map((item) => renderMobileNavItem(item))}
+            <Link
+              to="/cart"
+              onClick={() => setIsMenuOpen(false)}
+              className={cn(
+                "px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2",
+                location.pathname === "/cart"
+                  ? "bg-secondary text-primary font-semibold"
+                  : "text-muted-foreground hover:text-primary hover:bg-secondary/70"
+              )}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Cart
+              {cartItemCount > 0 && (
+                <span className="ml-auto h-5 min-w-5 px-1.5 rounded-full bg-[#5F7F64] text-white text-xs font-semibold flex items-center justify-center">
+                  {cartItemCount > 9 ? "9+" : cartItemCount}
+                </span>
+              )}
+            </Link>
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 variant="outline"

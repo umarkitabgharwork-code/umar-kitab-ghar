@@ -15,6 +15,7 @@ import {
   getRelatedProducts,
 } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { supabase } from "@/lib/supabase";
 
 type ProductReviewRow = {
@@ -232,6 +233,14 @@ const ProductDetailPage = () => {
         image: mainImageUrl ?? undefined,
       });
     }
+    toast({
+      description: "Added to cart.",
+      action: (
+        <ToastAction altText="View cart" onClick={() => navigate("/cart")}>
+          View Cart
+        </ToastAction>
+      ),
+    });
   };
 
   const getStockStatus = () => {
