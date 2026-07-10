@@ -41,6 +41,8 @@ import {
 import { supabase } from "@/lib/supabase";
 import { TestimonialSlider, type Review as StoreReview } from "@/components/TestimonialSlider";
 import { cn } from "@/lib/utils";
+import { BRIGHT_CAREER_CAMPAIGN_ACTIVE } from "@/lib/brightCareerCampaign";
+import { BrightCareerHeroContent } from "@/components/campaign/BrightCareerHeroContent";
 
 const FEATURE_STRIP = [
   { icon: BookOpen, label: "Wide Range of Books" },
@@ -395,6 +397,27 @@ const HomePage = () => {
 
               {/* Center — headline & CTAs */}
               <div className="order-1 lg:order-2 flex flex-col items-center justify-center text-center px-1 lg:px-4">
+                {BRIGHT_CAREER_CAMPAIGN_ACTIVE ? (
+                  <>
+                    <BrightCareerHeroContent />
+                    {banners.length > 1 && (
+                      <div className="mt-6 flex items-center justify-center gap-2">
+                        {banners.map((_, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setCurrentIndex(i)}
+                            className={cn(
+                              "h-2 rounded-full transition-all",
+                              i === currentIndex ? "w-8 bg-[#5F7F64]" : "w-2 bg-[#E8DEC8] hover:bg-[#5F7F64]/40"
+                            )}
+                            aria-label={`Go to banner ${i + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
                 <div className="w-full max-w-[720px]">
                   <span className="inline-flex items-center rounded-full border border-[#E8DEC8] bg-white/80 px-4 py-1.5 text-xs font-medium text-[#5F7F64] mb-4">
                     Your Trusted Learning Partner
@@ -442,6 +465,7 @@ const HomePage = () => {
                     </div>
                   )}
                 </div>
+                )}
               </div>
 
               {/* Right — benefit cards only (no banner image) */}

@@ -8,6 +8,8 @@ import { CheckoutProvider } from "@/contexts/CheckoutContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Layout } from "@/components/layout/Layout";
 import { PromoPopup } from "@/components/PromoPopup";
+import { BRIGHT_CAREER_CAMPAIGN_ACTIVE } from "@/lib/brightCareerCampaign";
+import { BrightCareerCampaignPopup } from "@/components/campaign/BrightCareerCampaignPopup";
 import ScrollToTop from "@/components/ScrollToTop";
 import HomePage from "./pages/HomePage";
 import DealsPage from "./pages/DealsPage";
@@ -52,7 +54,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
-              <PromoPopup />
+              {BRIGHT_CAREER_CAMPAIGN_ACTIVE ? <BrightCareerCampaignPopup /> : <PromoPopup />}
               <Routes>
                 {/* Public Website */}
                 <Route element={<Layout />}>

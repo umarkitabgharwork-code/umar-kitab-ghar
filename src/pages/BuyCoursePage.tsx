@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { COURSE_TYPES, COURSE_STEPS, CLASSES, type CourseType, type CourseStep }
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { resolvePreselectedSchool } from "@/lib/brightCareerCampaign";
 
 interface Book {
   id: string;
@@ -73,6 +74,9 @@ const BuyCoursePage = () => {
   const [bookListUploading, setBookListUploading] = useState(false);
   const { addItem } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const preselectSchoolSlug = searchParams.get("school");
+  const preselectAppliedRef = useRef(false);
 
   // Load distinct school names from courses
   useEffect(() => {
@@ -96,6 +100,18 @@ const BuyCoursePage = () => {
     };
     loadSchools();
   }, []);
+
+  // Campaign / deep-link: skip school step when ?school=bright-career-school
+  useEffect(() => {
+    if (!preselectSchoolSlug || schoolsLoading || preselectAppliedRef.current) return;
+
+    const schoolName = resolvePreselectedSchool(preselectSchoolSlug, schools);
+    if (!schoolName) return;
+
+    preselectAppliedRef.current = true;
+    setSelectedSchool(schoolName);
+    setStep(COURSE_STEPS.CLASS);
+  }, [preselectSchoolSlug, schools, schoolsLoading]);
 
   // When a school is selected, load its course and build classes list (optional)
   useEffect(() => {
@@ -621,21 +637,23 @@ const BuyCoursePage = () => {
   return (
     <div className="page-section">
       <div className="container max-w-4xl">
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {COURSE_SHORTCUTS.map((shortcut) => (
-            <Link
-              key={shortcut.path}
-              to={shortcut.path}
-              className={cn(
-                "rounded-2xl border bg-[#DDE8D8] p-5 text-left shadow-sm transition-all duration-200 md:p-6",
-                "border-[#5F7F64]/30 hover:-translate-y-0.5 hover:border-[#C9A44C] hover:shadow-md",
-              )}
-            >
-              <h3 className="text-lg font-semibold text-[#071D36] md:text-xl">{shortcut.title}</h3>
-              <p className="mt-1.5 text-sm leading-snug text-[#5F7F64]">{shortcut.subtitle}</p>
-            </Link>
-          ))}
-        </div>
+        {step === COURSE_STEPS.SCHOOL ? (
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {COURSE_SHORTCUTS.map((shortcut) => (
+              <Link
+                key={shortcut.path}
+                to={shortcut.path}
+                className={cn(
+                  "rounded-2xl border bg-[#DDE8D8] p-5 text-left shadow-sm transition-all duration-200 md:p-6",
+                  "border-[#5F7F64]/30 hover:-translate-y-0.5 hover:border-[#C9A44C] hover:shadow-md",
+                )}
+              >
+                <h3 className="text-lg font-semibold text-[#071D36] md:text-xl">{shortcut.title}</h3>
+                <p className="mt-1.5 text-sm leading-snug text-[#5F7F64]">{shortcut.subtitle}</p>
+              </Link>
+            ))}
+          </div>
+        ) : null}
 
         <div className="flex items-center justify-center gap-2 mb-8">
           {[COURSE_STEPS.SCHOOL, COURSE_STEPS.CLASS, COURSE_STEPS.COURSE].map((s, index) => {
