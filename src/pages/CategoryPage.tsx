@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import {
   getCategoryWithProductsBySlug,
   getProductStock,
+  getEffectiveBookPrice,
   type CategoryWithProducts,
   type CategoryProductListFilters,
 } from "@/services/api";
@@ -251,7 +252,7 @@ const CategoryPage = () => {
     }
 
     const displayName = book.title ?? "Product";
-    const displayPrice = Number(book.price ?? 0);
+    const displayPrice = getEffectiveBookPrice(book.price, book.sale_price);
 
     addItem({
       id: book.id,
@@ -526,9 +527,18 @@ const CategoryPage = () => {
                             </Link>
                             <div className="flex items-center justify-between mt-2">
                               <div className="flex flex-col items-start">
-                                <span className="text-lg text-price">
-                                  Rs. {product.price ?? 0}
-                                </span>
+                                {product.sale_price != null ? (
+                                  <span className="flex items-baseline gap-2 text-lg text-price">
+                                    <span className="text-sm text-muted-foreground line-through">
+                                      Rs. {product.price ?? 0}
+                                    </span>
+                                    <span>Rs. {product.sale_price}</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-lg text-price">
+                                    Rs. {product.price ?? 0}
+                                  </span>
+                                )}
                                 {showLowStock && (
                                   <span className="text-xs font-medium text-red-600">
                                     Only {stock} left

@@ -63,6 +63,7 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<AdminBook | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editSalePrice, setEditSalePrice] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editSetStock, setEditSetStock] = useState("");
   const [editIncreaseStock, setEditIncreaseStock] = useState("");
@@ -74,6 +75,7 @@ export default function Admin() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [bookTitle, setBookTitle] = useState("");
   const [bookPrice, setBookPrice] = useState("");
+  const [bookSalePrice, setBookSalePrice] = useState("");
   const [bookDescription, setBookDescription] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [creatingBook, setCreatingBook] = useState(false);
@@ -452,6 +454,7 @@ export default function Admin() {
     setEditingProduct(product);
     setEditTitle(product.title ?? "");
     setEditPrice(product.price != null ? String(product.price) : "");
+    setEditSalePrice(product.sale_price != null ? String(product.sale_price) : "");
     setEditDescription(product.description ?? "");
     setEditSetStock("");
     setEditIncreaseStock("");
@@ -483,9 +486,22 @@ export default function Admin() {
     if (Number.isNaN(priceNumber) || priceNumber < 0) {
       toast({
         variant: "destructive",
-        description: "Please enter a valid price.",
+        description: "Please enter a valid original price.",
       });
       return;
+    }
+
+    let salePriceValue: number | null = null;
+    if (editSalePrice.trim() !== "") {
+      const saleNumber = Number(editSalePrice);
+      if (Number.isNaN(saleNumber) || saleNumber < 0) {
+        toast({
+          variant: "destructive",
+          description: "Please enter a valid sale price, or leave it empty.",
+        });
+        return;
+      }
+      salePriceValue = saleNumber;
     }
 
     const parseNonNegative = (value: string, label: string): number | null => {
@@ -537,6 +553,7 @@ export default function Admin() {
       id: editingProduct.id,
       title: trimmedTitle,
       price: priceNumber,
+      sale_price: salePriceValue,
       description: editDescription.trim() || null,
       stock: newStock,
       is_active: editIsActive,
@@ -556,6 +573,7 @@ export default function Admin() {
     setEditingProduct(null);
     setEditTitle("");
     setEditPrice("");
+    setEditSalePrice("");
     setEditDescription("");
     setEditSetStock("");
     setEditIncreaseStock("");
@@ -660,9 +678,22 @@ export default function Admin() {
     if (Number.isNaN(priceNumber) || priceNumber < 0) {
       toast({
         variant: "destructive",
-        description: "Please enter a valid price.",
+        description: "Please enter a valid original price.",
       });
       return;
+    }
+
+    let salePriceValue: number | null = null;
+    if (bookSalePrice.trim() !== "") {
+      const saleNumber = Number(bookSalePrice);
+      if (Number.isNaN(saleNumber) || saleNumber < 0) {
+        toast({
+          variant: "destructive",
+          description: "Please enter a valid sale price, or leave it empty.",
+        });
+        return;
+      }
+      salePriceValue = saleNumber;
     }
 
     let publisherIdToUse = selectedPublisher;
@@ -697,6 +728,7 @@ export default function Admin() {
       categoryId: selectedCategory,
       title: bookTitle.trim(),
       price: priceNumber,
+      sale_price: salePriceValue,
       description: bookDescription.trim() || null,
       images: selectedImages,
       publisherId: publisherIdToUse && publisherIdToUse !== "other" ? publisherIdToUse : null,
@@ -721,6 +753,7 @@ export default function Admin() {
     setSelectedCategory("");
     setBookTitle("");
     setBookPrice("");
+    setBookSalePrice("");
     setBookDescription("");
     setSelectedImages([]);
     setSelectedPublisher("");
@@ -1180,12 +1213,22 @@ export default function Admin() {
           />
 
           <input
-            placeholder="Price"
+            placeholder="Original Price"
             type="number"
             min="0"
             step="1"
             value={bookPrice}
             onChange={(e) => setBookPrice(e.target.value)}
+            className={inputClass}
+          />
+
+          <input
+            placeholder="Sale Price (Optional)"
+            type="number"
+            min="0"
+            step="1"
+            value={bookSalePrice}
+            onChange={(e) => setBookSalePrice(e.target.value)}
             className={inputClass}
           />
 
@@ -1319,7 +1362,18 @@ export default function Admin() {
                       <div className="font-medium">{product.title ?? "Untitled"}</div>
                       <div className="text-xs text-muted-foreground">ID: {product.id}</div>
                     </td>
-                    <td className="px-4 py-3 text-foreground">Rs. {product.price ?? 0}</td>
+                    <td className="px-4 py-3 text-foreground">
+                      {product.sale_price != null ? (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xs text-muted-foreground line-through">
+                            Rs. {product.price ?? 0}
+                          </span>
+                          <span className="text-price">Rs. {product.sale_price}</span>
+                        </div>
+                      ) : (
+                        <>Rs. {product.price ?? 0}</>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-foreground">{product.stock ?? 0}</td>
                     <td className="px-4 py-3 text-foreground">{isActive ? "Active" : "Inactive"}</td>
                     <td className="px-4 py-3">
@@ -2241,13 +2295,36 @@ export default function Admin() {
 
               <div>
                 <label>
-                  <div>Price</div>
+                  <div>Original Price</div>
                   <input
                     type="number"
                     min="0"
                     step="1"
                     value={editPrice}
                     onChange={(e) => setEditPrice(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: 10,
+                      boxSizing: "border-box",
+                      background: "hsl(var(--background))",
+                      color: "hsl(var(--foreground))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 6,
+                    }}
+                  />
+                </label>
+              </div>
+
+              <div>
+                <label>
+                  <div>Sale Price (Optional)</div>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={editSalePrice}
+                    onChange={(e) => setEditSalePrice(e.target.value)}
+                    placeholder="Leave empty to remove"
                     style={{
                       width: "100%",
                       padding: 10,

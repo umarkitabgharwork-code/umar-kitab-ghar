@@ -731,7 +731,8 @@ const HomePage = () => {
                   key={b.id}
                   imageUrl={b.image_url}
                   title={b.title}
-                  price={b.price}
+                  price={b.sale_price != null ? b.sale_price : b.price}
+                  strikethroughPrice={b.sale_price != null ? b.price : undefined}
                   badge="Trending"
                   productId={b.id}
                   fromPath={location.pathname}
@@ -777,7 +778,8 @@ const HomePage = () => {
                   key={b.id}
                   imageUrl={b.image_url}
                   title={b.title}
-                  price={b.price}
+                  price={b.sale_price != null ? b.sale_price : b.price}
+                  strikethroughPrice={b.sale_price != null ? b.price : undefined}
                   badge="Best Seller"
                   productId={b.id}
                   fromPath={location.pathname}

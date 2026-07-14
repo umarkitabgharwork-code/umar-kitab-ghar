@@ -13,6 +13,7 @@ import {
   getProductDetail,
   getProductStock,
   getRelatedProducts,
+  getEffectiveBookPrice,
 } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -228,7 +229,7 @@ const ProductDetailPage = () => {
       addItem({
         id: product.id,
         name: product.title ?? "Product",
-        price: Number(product.price ?? 0),
+        price: getEffectiveBookPrice(product.price, product.sale_price),
         category: product.category_name ?? "Product",
         image: mainImageUrl ?? undefined,
       });
@@ -353,7 +354,16 @@ const ProductDetailPage = () => {
           {/* Details */}
           <div className="space-y-4">
             <h1 className="page-heading text-2xl md:text-3xl">{product.title ?? "Untitled Product"}</h1>
-            <p className="text-lg text-price font-semibold">Rs. {product.price ?? 0}</p>
+            {product.sale_price != null ? (
+              <p className="flex items-baseline gap-2 text-lg font-semibold">
+                <span className="text-muted-foreground line-through text-base font-normal">
+                  Rs. {product.price ?? 0}
+                </span>
+                <span className="text-price">Rs. {product.sale_price}</span>
+              </p>
+            ) : (
+              <p className="text-lg text-price font-semibold">Rs. {product.price ?? 0}</p>
+            )}
             <p className="text-sm text-muted-foreground">
               {outOfStock ? (
                 <span className="font-medium text-red-600">{getStockStatus()}</span>
@@ -560,7 +570,16 @@ const ProductDetailPage = () => {
                           </h3>
                         </Link>
                         <div className="text-sm text-price font-semibold">
-                          Rs. {item.price}
+                          {item.salePrice != null ? (
+                            <span className="flex items-baseline gap-2">
+                              <span className="text-xs text-muted-foreground line-through font-normal">
+                                Rs. {item.price}
+                              </span>
+                              <span>Rs. {item.salePrice}</span>
+                            </span>
+                          ) : (
+                            <>Rs. {item.price}</>
+                          )}
                         </div>
                       </div>
                     </CardContent>

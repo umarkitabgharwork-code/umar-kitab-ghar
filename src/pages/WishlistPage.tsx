@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { getWishlist, removeFromWishlist } from "@/services/api";
+import { getWishlist, removeFromWishlist, getEffectiveBookPrice } from "@/services/api";
 import { getProductStock } from "@/services/api";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,14 @@ const WishlistPage = () => {
 
   const items = wishlistItems ?? [];
 
-  const handleAddToCart = async (product: { id: string; name: string; price: number; image?: string; category?: string }) => {
+  const handleAddToCart = async (product: {
+    id: string;
+    name: string;
+    price: number;
+    salePrice?: number | null;
+    image?: string;
+    category?: string;
+  }) => {
     const stockRes = await getProductStock(product.id);
     if (!stockRes.success || stockRes.data.stock <= 0) {
       toast({ variant: "destructive", description: "This item is out of stock." });
@@ -69,7 +76,7 @@ const WishlistPage = () => {
     addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: getEffectiveBookPrice(product.price, product.salePrice),
       category: product.category ?? "Product",
       image: product.image,
     });
@@ -164,7 +171,18 @@ const WishlistPage = () => {
                     <Link to={`/product/${item.book_id}`} state={{ from: location.pathname }}>
                       <h3 className="font-medium line-clamp-2 hover:underline mb-1">{p.name}</h3>
                     </Link>
-                    <p className="text-lg text-price font-semibold mb-4">Rs. {p.price}</p>
+                    <p className="text-lg text-price font-semibold mb-4">
+                      {p.salePrice != null ? (
+                        <span className="flex items-baseline gap-2">
+                          <span className="text-sm text-muted-foreground line-through font-normal">
+                            Rs. {p.price}
+                          </span>
+                          <span>Rs. {p.salePrice}</span>
+                        </span>
+                      ) : (
+                        <>Rs. {p.price}</>
+                      )}
+                    </p>
                     <div className="flex gap-2">
                       <Button
                         size="sm"

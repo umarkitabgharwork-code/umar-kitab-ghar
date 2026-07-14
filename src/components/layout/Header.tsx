@@ -504,7 +504,16 @@ export function Header() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="font-medium text-sm line-clamp-2">{item.title ?? "Untitled"}</div>
-                              <div className="text-xs text-price">Rs. {item.price ?? 0}</div>
+                              {item.sale_price != null ? (
+                                <div className="flex items-baseline gap-1.5 text-xs">
+                                  <span className="text-muted-foreground line-through">
+                                    Rs. {item.price ?? 0}
+                                  </span>
+                                  <span className="text-price">Rs. {item.sale_price}</span>
+                                </div>
+                              ) : (
+                                <div className="text-xs text-price">Rs. {item.price ?? 0}</div>
+                              )}
                             </div>
                           </Link>
                         </li>

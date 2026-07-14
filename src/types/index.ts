@@ -29,7 +29,10 @@ export type ProductCategory =
 export interface Product {
   id: string;
   name: string;
+  /** Original / list price */
   price: number;
+  /** Optional discounted sale price; when set, this is the buying price */
+  salePrice?: number | null;
   type: ProductType;
   category: ProductCategory;
   image?: string;

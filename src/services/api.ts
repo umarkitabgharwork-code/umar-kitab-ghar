@@ -10,6 +10,17 @@ function handleError(error: unknown, context: string) {
   console.error(`[API ERROR] ${context}:`, error);
 }
 
+/** Buying price: sale_price when set, otherwise original price. */
+export function getEffectiveBookPrice(
+  price: number | null | undefined,
+  salePrice?: number | null
+): number {
+  if (typeof salePrice === "number" && !Number.isNaN(salePrice) && salePrice >= 0) {
+    return salePrice;
+  }
+  return typeof price === "number" && !Number.isNaN(price) ? price : 0;
+}
+
 function baseBooksQuery() {
   return supabase
     .from("books")
@@ -18,6 +29,7 @@ function baseBooksQuery() {
       id,
       title,
       price,
+      sale_price,
       image_url,
       description,
       category_id,
@@ -184,6 +196,7 @@ type BookRow = {
   id: string;
   title: string | null;
   price: number | null;
+  sale_price?: number | null;
   image_url: string | null;
   description?: string | null;
   category_id?: string | null;
@@ -349,6 +362,7 @@ function mapBookToProduct(
     id: book.id,
     name: book.title ?? "",
     price: book.price ?? 0,
+    salePrice: typeof book.sale_price === "number" ? book.sale_price : null,
     type: overrides?.type ?? "book",
     category: overrides?.category ?? "study",
     image: primaryImage ?? book.image_url ?? undefined,
@@ -529,6 +543,7 @@ export type ProductDetail = {
   id: string;
   title: string | null;
   price: number | null;
+  sale_price: number | null;
   description: string | null;
   stock: number;
   is_active: boolean | null;
@@ -551,6 +566,7 @@ export async function getProductDetail(
       id,
       title,
       price,
+      sale_price,
       description,
       stock,
       is_active,
@@ -585,6 +601,7 @@ export async function getProductDetail(
     id: string;
     title: string | null;
     price: number | null;
+    sale_price?: number | null;
     description: string | null;
     stock: number | null;
     is_active: boolean | null;
@@ -598,6 +615,7 @@ export async function getProductDetail(
     id: row.id,
     title: row.title,
     price: row.price,
+    sale_price: typeof row.sale_price === "number" ? row.sale_price : null,
     description: row.description ?? null,
     stock: typeof row.stock === "number" ? row.stock : 0,
     is_active: row.is_active ?? null,
@@ -953,6 +971,7 @@ export async function getWishlist(): Promise<ApiResponse<WishlistItem[]>> {
       id,
       title,
       price,
+      sale_price,
       image_url,
       description,
       category_id,
@@ -1031,6 +1050,7 @@ export type SearchProduct = {
   id: string;
   title: string | null;
   price: number | null;
+  sale_price: number | null;
   image: string | null;
 };
 
@@ -1056,6 +1076,7 @@ export async function searchProducts(
     id: string;
     title: string | null;
     price: number | null;
+    sale_price?: number | null;
     image_url?: string | null;
     product_images?: { image_url: string | null }[];
   }) => {
@@ -1064,13 +1085,14 @@ export async function searchProducts(
       id: row.id,
       title: row.title ?? null,
       price: row.price ?? null,
+      sale_price: typeof row.sale_price === "number" ? row.sale_price : null,
       image: img ?? null,
     });
   };
 
   const { data: byTitle } = await supabase
     .from("books")
-    .select("id, title, price, image_url, product_images(image_url)")
+    .select("id, title, price, sale_price, image_url, product_images(image_url)")
     .eq("is_active", true)
     .ilike("title", pattern)
     .limit(SEARCH_RESULT_LIMIT);
@@ -1079,6 +1101,7 @@ export async function searchProducts(
     id: string;
     title: string | null;
     price: number | null;
+    sale_price?: number | null;
     image_url?: string | null;
     product_images?: { image_url: string | null }[];
   };
@@ -1095,7 +1118,7 @@ export async function searchProducts(
   if (categoryIds.length > 0) {
     const { data: byCategory } = await supabase
       .from("books")
-      .select("id, title, price, image_url, product_images(image_url)")
+      .select("id, title, price, sale_price, image_url, product_images(image_url)")
       .eq("is_active", true)
       .in("category_id", categoryIds)
       .limit(SEARCH_RESULT_LIMIT);
@@ -1818,6 +1841,7 @@ export type AdminBook = {
   id: string;
   title: string | null;
   price: number | null;
+  sale_price: number | null;
   stock: number | null;
   is_active: boolean | null;
   low_stock_threshold: number | null;
@@ -1837,7 +1861,7 @@ export async function adminGetBooks(): Promise<ApiResponse<AdminBook[]>> {
   const { data, error } = await supabase
     .from("books")
     .select(
-      "id, title, price, stock, is_active, low_stock_threshold, category_id, description, publisher_id, genre_id, subject_id, class_id, language"
+      "id, title, price, sale_price, stock, is_active, low_stock_threshold, category_id, description, publisher_id, genre_id, subject_id, class_id, language"
     )
     .order("created_at", { ascending: false });
 
@@ -1849,6 +1873,7 @@ export async function adminUpdateBook(params: {
   id: string;
   title: string;
   price: number;
+  sale_price: number | null;
   description: string | null;
   stock: number;
   is_active: boolean;
@@ -1862,6 +1887,7 @@ export async function adminUpdateBook(params: {
     .update({
       title: params.title,
       price: params.price,
+      sale_price: params.sale_price,
       description: params.description,
       stock: params.stock,
       is_active: params.is_active,
@@ -1894,6 +1920,7 @@ export async function adminCreateBookWithImages(params: {
   categoryId: string;
   title: string;
   price: number;
+  sale_price?: number | null;
   description: string | null;
   images: File[];
   publisherId?: string | null;
@@ -1913,6 +1940,7 @@ export async function adminCreateBookWithImages(params: {
       {
         title: params.title,
         price: params.price,
+        sale_price: params.sale_price ?? null,
         description: params.description,
         category_id: params.categoryId,
         is_active: true,
@@ -2379,6 +2407,7 @@ export type AutomatedHomeBook = {
   id: string;
   title: string;
   price: number;
+  sale_price: number | null;
   image_url: string | null;
   metric: number;
 };
@@ -2393,6 +2422,7 @@ export async function getBestSellerBooks(): Promise<ApiResponse<AutomatedHomeBoo
         id,
         title,
         price,
+        sale_price,
         image_url,
         product_images(image_url)
       )
@@ -2409,6 +2439,7 @@ export async function getBestSellerBooks(): Promise<ApiResponse<AutomatedHomeBoo
       id?: string | null;
       title?: string | null;
       price?: number | null;
+      sale_price?: number | null;
       image_url?: string | null;
       product_images?: { image_url: string | null }[] | null;
     } | null;
@@ -2424,6 +2455,7 @@ export async function getBestSellerBooks(): Promise<ApiResponse<AutomatedHomeBoo
         id: b.id,
         title: b.title,
         price: b.price,
+        sale_price: typeof b.sale_price === "number" ? b.sale_price : null,
         image_url: img,
         metric: typeof r.total_sold === "number" ? r.total_sold : 0,
       },
@@ -2443,6 +2475,7 @@ export async function getTrendingBooks(): Promise<ApiResponse<AutomatedHomeBook[
         id,
         title,
         price,
+        sale_price,
         image_url,
         product_images(image_url)
       )
@@ -2459,6 +2492,7 @@ export async function getTrendingBooks(): Promise<ApiResponse<AutomatedHomeBook[
       id?: string | null;
       title?: string | null;
       price?: number | null;
+      sale_price?: number | null;
       image_url?: string | null;
       product_images?: { image_url: string | null }[] | null;
     } | null;
@@ -2474,6 +2508,7 @@ export async function getTrendingBooks(): Promise<ApiResponse<AutomatedHomeBook[
         id: b.id,
         title: b.title,
         price: b.price,
+        sale_price: typeof b.sale_price === "number" ? b.sale_price : null,
         image_url: img,
         metric: typeof r.recent_sales === "number" ? r.recent_sales : 0,
       },

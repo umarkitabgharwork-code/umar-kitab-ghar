@@ -76,7 +76,14 @@ const BestSellersPage = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between pt-1">
-                    <p className="text-sm text-price font-semibold">Rs. {b.price}</p>
+                    {b.sale_price != null ? (
+                      <div>
+                        <p className="text-xs text-muted-foreground line-through">Rs. {b.price}</p>
+                        <p className="text-sm text-price font-semibold">Rs. {b.sale_price}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-price font-semibold">Rs. {b.price}</p>
+                    )}
                     <Button
                       asChild
                       size="sm"
